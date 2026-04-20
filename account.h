@@ -22,9 +22,7 @@ struct Account {
     bool        allowOverdraft; // 거부: false, 허용(마이너스 가능): true
     qint64      currentBalance;
 
-    Account() : id(0), initialBalance(0), status("활성"), allowOverdraft(false), currentBalance(0) {
-        createdAt = QDateTime::currentDateTime();
-    }
+    Account();
 };
 
 // =======================================================================

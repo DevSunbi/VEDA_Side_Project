@@ -1,7 +1,7 @@
 #include "account.h"
 
-Account::Account() 
-    : id(0), initialBalance(0), status("활성"), allowOverdraft(false), currentBalance(0) 
+Account::Account()
+    : id(0), initialBalance(0), status("활성"), allowOverdraft(false), currentBalance(0)
 {
     createdAt = QDateTime::currentDateTime();
 }
