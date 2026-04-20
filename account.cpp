@@ -1,15 +1,29 @@
 #include "account.h"
+#include <QLocale>
 
+// =======================================================================
+// Account 구조체 구현 (생성자)
+// =======================================================================
 Account::Account() 
     : id(0), initialBalance(0), status("활성"), allowOverdraft(false), currentBalance(0) 
 {
     createdAt = QDateTime::currentDateTime();
 }
 
+// =======================================================================
+// AccountModel 클래스 구현
+// =======================================================================
 AccountModel::AccountModel(QObject *parent) : QAbstractTableModel(parent) {}
 
-int AccountModel::rowCount(const QModelIndex &parent) const { return m_accounts.size(); }
-int AccountModel::columnCount(const QModelIndex &parent) const { return 4; }
+int AccountModel::rowCount(const QModelIndex &parent) const { 
+    Q_UNUSED(parent)
+    return m_accounts.size(); 
+}
+
+int AccountModel::columnCount(const QModelIndex &parent) const { 
+    Q_UNUSED(parent)
+    return ColumnCount; // 계좌명, 계좌번호, 은행, 잔고
+}
 
 QVariant AccountModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid() || index.row() >= m_accounts.size()) return QVariant();
@@ -17,10 +31,10 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const {
 
     if (role == Qt::DisplayRole) {
         switch (index.column()) {
-            case 0: return acc.name;
-            case 1: return acc.accountNumber;
-            case 2: return acc.bankName;
-            case 3: return acc.currentBalance;
+            case NameColumn: return acc.name;
+            case NumberColumn: return acc.accountNumber;
+            case BankColumn: return acc.bankName;
+            case BalanceColumn: return acc.currentBalance;
         }
     }
     return QVariant();
@@ -29,22 +43,24 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const {
 QVariant AccountModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (role != Qt::DisplayRole || orientation != Qt::Horizontal) return QVariant();
     switch (section) {
-        case 0: return "계좌명";
-        case 1: return "계좌번호";
-        case 2: return "은행";
-        case 3: return "잔고";
+        case NameColumn: return "계좌명";
+        case NumberColumn: return "계좌번호";
+        case BankColumn: return "은행";
+        case BalanceColumn: return "잔고";
     }
     return QVariant();
 }
 
 void AccountModel::addAccount(const Account &acc) {
+    // 모델에 새로운 행이 추가됨을 알림
     beginInsertRows(QModelIndex(), m_accounts.size(), m_accounts.size());
     m_accounts.append(acc);
     endInsertRows();
 }
 
-QList<Account>& AccountModel::accounts() { return m_accounts; }
-const QList<Account>& AccountModel::accounts() const { return m_accounts; }
+const QList<Account>& AccountModel::accounts() const {
+    return m_accounts;
+}
 
 void AccountModel::updateAll() {
     if (m_accounts.isEmpty()) return;

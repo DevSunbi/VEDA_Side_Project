@@ -22,9 +22,7 @@ struct Transaction {
     QString     type;   // "입금", "출금", "송금"
     QString     status; // "정상", "취소"
 
-    Transaction() : id(0), accountId(0), amount(0), type("입금"), status("정상") {
-        occurredAt = QDateTime::currentDateTime();
-    }
+    Transaction();
 };
 
 // =======================================================================

@@ -53,6 +53,11 @@ void MainWindow::on_actionAdd_triggered()
     }
 }
 
+void MainWindow::on_actionDelete_triggered()
+{
+    // [TODO] 현재 선택된 탭의 계좌를 확인하고, 삭제 로직을 구현하세요.
+}
+
 void MainWindow::on_pushButton_calc_clicked()   // [입금] 버튼
 {
     int id = currentAccountId();
