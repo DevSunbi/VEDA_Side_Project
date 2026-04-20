@@ -58,11 +58,19 @@ void AccountModel::addAccount(const Account &acc) {
     endInsertRows();
 }
 
-const QList<Account>& AccountModel::accounts() const {
+QList<Account>& AccountModel::accounts(){
     return m_accounts;
 }
 
 void AccountModel::updateAll() {
     if (m_accounts.isEmpty()) return;
     emit dataChanged(index(0, 0), index(m_accounts.size()-1, columnCount()-1));
+}
+
+void AccountModel::removeAccount(int row)
+{
+    if(row<0||row>=m_accounts.size()) return;
+    beginRemoveRows(QModelIndex(), row, row);
+    m_accounts.removeAt(row);
+    endRemoveRows();
 }

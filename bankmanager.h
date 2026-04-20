@@ -18,7 +18,7 @@ public:
     TransactionModel* transactionModel() const { return m_transactionModel; }
 
     // ── 핵심 기능 함수들 (이전 코드 스타일을 유지함) ──
-    bool addAccount(const QString &name, const QString &accNum, const QString &bank, qint64 initial);
+    bool addAccount(const QString &accNum, qint64 initial);
     void addTransaction(int accountId, qint64 amount, const QString &type, const QString &memo = "", const QString &category = "");
     
     // 전체 거래 내역을 처음부터 끝까지 다 더하고 빼서 잔고를 최신으로 맞추는 마법의 함수!

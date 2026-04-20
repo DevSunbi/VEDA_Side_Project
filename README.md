@@ -81,6 +81,15 @@ SideProject_Account/
 
 ---
 
+## 최근 진행 및 문제 해결 사항 (업데이트 내역)
+
+- **UI 불일치 동기화**: `mainwindow.h` 및 `mainwindow.cpp`의 슬롯 함수 이름(`on_Deposit_Btn_clicked` 등)을 `mainwindow.ui`의 실제 버튼 이름들과 완벽히 일치하도록 수정하여 Qt Auto-Connect 기능 정상화.
+- **계좌 생성 로직 디버깅**: `QInputDialog` 사용 시 미리 선언되지 않았던 식별자(`isSuccess`) 사용 문제 해결, 입력 취소 시 빈 계좌가 강제 생성되는 버그 방어.
+- **계좌 삭제 누락 기능 구현**: `mainwindow.cpp` 호출부 대소문자 오타(`targetid` -> `targetId`) 수정 및 `AccountModel` 내부에 실질적으로 데이터를 지우는 `removeAccount(int row)` 로직 새로 추가.
+- **탭 동기화 스크립트 연결**: 탭 전환 시 잔액 및 뷰를 새로고침 해주는 기능인 `refreshSummary()`를 `Sel_Acc_Tab`에 맞춰 자동 호출되도록 스크립트 이름 연결.
+
+---
+
 ## 빌드 환경
 
 - **Qt** : 6.x

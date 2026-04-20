@@ -21,11 +21,12 @@ public:
 
 private slots:
     // ── UI 버튼 클릭 이벤트 (슬롯) ──
-    void on_pushButton_calc_clicked();      // [입금] 버튼
-    void on_pushButton_save_clicked();      // [출금] 버튼
-    void on_pushButton_login_clicked();     // [송금] 버튼
-    void on_pushButton_reset_clicked();     // [정정/취소] 버튼
-    void on_pushButton_help_clicked();      // [저장] 버튼
+    void on_Deposit_Btn_clicked();      // [입금] 버튼
+    void on_Withdraw_Btn_clicked();      // [출금] 버튼
+    void on_Confirm_Btn_clicked();     // [송금] 버튼
+    void on_Re_Btn_clicked();     // [정정/취소] 버튼
+    void on_Save_Btn_clicked();      // [저장] 버튼
+    void on_Sel_Acc_Tab_currentChanged(int index); // 탭 전환
 
     // ── 메뉴/기타 이벤트 ──
     void on_actionAdd_triggered();          // 계좌 추가 메뉴

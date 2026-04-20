@@ -48,10 +48,11 @@ public:
 
     // 데이터를 넣고 빼는 직관적인 함수들
     void addAccount(const Account &acc);
-    // QList<Account>& accounts();
-    // const QList<Account>& accounts() const;
+    QList<Account>& accounts();
+    //const QList<Account>& accounts() const;
     void updateAll(); // 화면 싹 다 새로고침 하라고 신호 보내기
-    const QList<Account>& accounts() const;
+    void removeAccount(int row);
+
 
 private:
     QList<Account> m_accounts; // 실제 계좌들이 담길 바구니
