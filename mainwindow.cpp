@@ -2,515 +2,185 @@
 #include "ui_mainwindow.h"
 
 #include <QMessageBox>
-#include <algorithm>
-
-// =======================================================================
-// AccountManager
-// =======================================================================
-
-// ── 계좌 CRUD ─────────────────────────────────────────────────────────────
-
-int AccountManager::createAccount(const Account &accountData,
-                                  QString *outError) {
-  // TODO: name 비어있으면 오류
-  // TODO: accountData 복사 → id = m_nextAccountId++ 세팅
-  // TODO: m_accounts.append(newAccount)
-  // TODO: recalcBalance(newAccount)
-  Q_UNUSED(accountData)
-  if (outError)
-    *outError = "Not implemented";
-  return -1;
-}
-
-bool AccountManager::updateAccount(int accountId, const Account &updated,
-                                   QString *outError) {
-  // TODO: findAccount(accountId) — 없으면 오류
-  // TODO: name, accountNumber, bankName, overdraftPolicy 만 덮어쓰기
-  // TODO: initialBalance 변경 시도 감지 → 오류
-  Q_UNUSED(accountId)
-  Q_UNUSED(updated)
-  if (outError)
-    *outError = "Not implemented";
-  return false;
-}
-
-bool AccountManager::deactivateAccount(int accountId, QString *outError) {
-  // TODO: findAccount(accountId) — 없으면 오류
-  // TODO: 이미 Inactive 면 오류
-  // TODO: status = Inactive
-  Q_UNUSED(accountId)
-  if (outError)
-    *outError = "Not implemented";
-  return false;
-}
-
-bool AccountManager::reactivateAccount(int accountId, QString *outError) {
-  // TODO: m_accounts 전체 순회 (Inactive 포함)
-  // TODO: status = Active
-  Q_UNUSED(accountId)
-  if (outError)
-    *outError = "Not implemented";
-  return false;
-}
-
-// ── 계좌 조회 ─────────────────────────────────────────────────────────────
-
-std::optional<Account> AccountManager::findById(int accountId) const {
-  // TODO: m_accounts 순회 → id 일치 시 해당 Account 반환
-  // TODO: 없으면 std::nullopt
-  Q_UNUSED(accountId)
-  return std::nullopt;
-}
-
-QList<Account> AccountManager::activeAccounts() const {
-  // TODO: m_accounts 에서 status == Active 만 필터
-  // TODO: 각 항목에 currentBalance 채워서 반환
-  return {};
-}
-
-QList<Account> AccountManager::allAccounts() const {
-  // TODO: m_accounts 전체 복사 (currentBalance 포함)
-  return {};
-}
-
-// ── 잔고 계산 ─────────────────────────────────────────────────────────────
-
-qint64 AccountManager::currentBalanceOf(int accountId) const {
-  // TODO: findAccount → currentBalance 반환
-  // TODO: 없으면 0
-  Q_UNUSED(accountId)
-  return 0;
-}
-
-qint64 AccountManager::totalActiveBalance() const {
-  // TODO: activeAccounts() 순회하며 currentBalance 합산
-  return 0;
-}
-
-QList<BalanceSnapshot>
-AccountManager::balanceHistory(int accountId, const QDateTime &from,
-                               const QDateTime &to) const {
-  // TODO: 기간 내 해당 계좌 거래를 오래된 순 정렬
-  // TODO: 초기잔고부터 시작해서 거래마다 누적 BalanceSnapshot 생성
-  Q_UNUSED(accountId)
-  Q_UNUSED(from)
-  Q_UNUSED(to)
-  return {};
-}
-
-// ── 내부 데이터 접근 ──────────────────────────────────────────────────────
-
-QList<Transaction> &AccountManager::transactions() { return m_transactions; }
-const QList<Transaction> &AccountManager::transactions() const {
-  return m_transactions;
-}
-int AccountManager::nextAccountId() const { return m_nextAccountId; }
-int AccountManager::nextTransactionId() const { return m_nextTransactionId; }
-
-// ── private 헬퍼 ──────────────────────────────────────────────────────────
-
-Account *AccountManager::findAccount(int accountId) {
-  // TODO: m_accounts 순회 → id 일치 시 포인터 반환, 없으면 nullptr
-  Q_UNUSED(accountId)
-  return nullptr;
-}
-
-const Account *AccountManager::findAccount(int accountId) const {
-  // TODO: const 버전 동일 로직
-  Q_UNUSED(accountId)
-  return nullptr;
-}
-
-void AccountManager::recalcBalance(Account &account) const {
-  // TODO: account.currentBalance = account.initialBalance
-  // TODO: m_transactions 순회 (accountId 일치 + Posted 만)
-  //         Deposit / TransferIn  → + amount
-  //         Withdraw / TransferOut → - amount
-  Q_UNUSED(account)
-}
-
-void AccountManager::recalcAllBalances() {
-  // TODO: for (auto &acc : m_accounts) recalcBalance(acc);
-}
-
-bool AccountManager::validateAmount(qint64 amount, QString *outError) {
-  // TODO: amount <= 0 이면 오류 메시지 세팅 후 false
-  Q_UNUSED(amount)
-  if (outError)
-    *outError = "Not implemented";
-  return false;
-}
-
-// =======================================================================
-// DepositModule
-// =======================================================================
-
-DepositModule::DepositModule(AccountManager *manager) : m_manager(manager) {}
-
-int DepositModule::deposit(int accountId, qint64 amount,
-                           const QDateTime &occurredAt, const QString &memo,
-                           const QString &category, QString *outError) {
-  // TODO: AccountManager::validateAmount(amount, outError)
-  // TODO: m_manager->findAccount(accountId) — 없으면 오류
-  // TODO: Transaction 생성 (type=Deposit, status=Posted) → id =
-  // m_manager->m_nextTransactionId++
-  // TODO: m_manager->m_transactions.append(tx)
-  // TODO: m_manager->recalcBalance(*account)
-  // TODO: 생성된 tx.id 반환
-  Q_UNUSED(accountId)
-  Q_UNUSED(amount)
-  Q_UNUSED(occurredAt)
-  Q_UNUSED(memo)
-  Q_UNUSED(category)
-  if (outError)
-    *outError = "Not implemented";
-  return -1;
-}
-
-// =======================================================================
-// WithdrawModule
-// =======================================================================
-
-WithdrawModule::WithdrawModule(AccountManager *manager) : m_manager(manager) {}
-
-int WithdrawModule::withdraw(int accountId, qint64 amount,
-                             const QDateTime &occurredAt, const QString &memo,
-                             QString *outError) {
-  // TODO: AccountManager::validateAmount(amount)
-  // TODO: checkOverdraft(accountId, amount) — Deny 정책이면 잔고 확인
-  // TODO: Transaction 생성 (type=Withdraw) → 추가 및 잔고 재계산
-  // TODO: tx.id 반환
-  Q_UNUSED(accountId)
-  Q_UNUSED(amount)
-  Q_UNUSED(occurredAt)
-  Q_UNUSED(memo)
-  if (outError)
-    *outError = "Not implemented";
-  return -1;
-}
-
-bool WithdrawModule::checkOverdraft(int accountId, qint64 amount,
-                                    QString *outError) const {
-  // TODO: m_manager->currentBalanceOf(accountId) - amount < 0 이고
-  //         policy == Deny 이면 오류 반환
-  Q_UNUSED(accountId)
-  Q_UNUSED(amount)
-  if (outError)
-    *outError = "Not implemented";
-  return false;
-}
-
-// =======================================================================
-// TransferModule
-// =======================================================================
-
-TransferModule::TransferModule(AccountManager *manager) : m_manager(manager) {}
-
-int TransferModule::transfer(int fromAccountId, int toAccountId, qint64 amount,
-                             const QDateTime &occurredAt, const QString &memo,
-                             QString *outError) {
-  // TODO: validateTransfer(from, to, amount)
-  // TODO: 출금 측 잔고 정책 확인 (Deny 이면 잔고 체크)
-  // TODO: groupId = m_manager->m_nextTransferGroupId++
-  // TODO: TransferOut 거래 생성 (from 계좌)
-  // TODO: TransferIn  거래 생성 (to 계좌)
-  // TODO: 둘 다 m_transactions 에 추가
-  // TODO: 두 계좌 recalcBalance 호출
-  // TODO: groupId 반환
-  Q_UNUSED(fromAccountId)
-  Q_UNUSED(toAccountId)
-  Q_UNUSED(amount)
-  Q_UNUSED(occurredAt)
-  Q_UNUSED(memo)
-  if (outError)
-    *outError = "Not implemented";
-  return -1;
-}
-
-bool TransferModule::validateTransfer(int fromAccountId, int toAccountId,
-                                      qint64 amount, QString *outError) const {
-  // TODO: from == to 이면 오류
-  // TODO: amount <= 0 이면 오류
-  // TODO: 두 계좌 모두 존재하고 Active 인지 확인
-  Q_UNUSED(fromAccountId)
-  Q_UNUSED(toAccountId)
-  Q_UNUSED(amount)
-  if (outError)
-    *outError = "Not implemented";
-  return false;
-}
-
-// =======================================================================
-// CorrectionModule
-// =======================================================================
-
-CorrectionModule::CorrectionModule(AccountManager *manager)
-    : m_manager(manager) {}
-
-bool CorrectionModule::cancelTransaction(int transactionId, QString *outError) {
-  // TODO: 거래 탐색 — 없으면 오류
-  // TODO: 이미 Canceled 이면 오류
-  // TODO: TransferOut/In 이면 findTransferPair 로 쌍을 찾아 함께 취소 (원자성)
-  // TODO: markCanceled 호출 후 recalcAllBalances
-  Q_UNUSED(transactionId)
-  if (outError)
-    *outError = "Not implemented";
-  return false;
-}
-
-bool CorrectionModule::correctTransaction(int transactionId,
-                                          const CorrectionRequest &req,
-                                          QString *outError) {
-  // TODO: Canceled 이면 오류
-  // TODO: 송금 거래고 amount 변경이면 쌍 모두 수정
-  // TODO: applyCorrection 호출
-  // TODO: recalcAllBalances 후 정책 위반 확인 → 위반 시 원복
-  Q_UNUSED(transactionId)
-  Q_UNUSED(req)
-  if (outError)
-    *outError = "Not implemented";
-  return false;
-}
-
-bool CorrectionModule::isCanceled(int transactionId) const {
-  // TODO: 거래 탐색 → status == Canceled 반환
-  Q_UNUSED(transactionId)
-  return false;
-}
-
-int CorrectionModule::findTransferPair(int transactionId) const {
-  // TODO: transactionId 의 transferGroupId 로 같은 그룹 내 반대 타입 거래 탐색
-  Q_UNUSED(transactionId)
-  return -1;
-}
-
-bool CorrectionModule::markCanceled(int transactionId, QString *outError) {
-  // TODO: 거래 탐색 → status = Canceled
-  Q_UNUSED(transactionId)
-  if (outError)
-    *outError = "Not implemented";
-  return false;
-}
-
-bool CorrectionModule::applyCorrection(int transactionId,
-                                       const CorrectionRequest &req,
-                                       QString *outError) {
-  // TODO: req 의 change* 플래그를 보고 해당 필드만 수정
-  Q_UNUSED(transactionId)
-  Q_UNUSED(req)
-  if (outError)
-    *outError = "Not implemented";
-  return false;
-}
-
-// =======================================================================
-// TransactionFilter
-// =======================================================================
-
-TransactionFilter::TransactionFilter(const AccountManager *manager)
-    : m_manager(manager) {}
-
-QList<Transaction>
-TransactionFilter::query(const FilterOptions &options) const {
-  // TODO: resolveDateRange(options) 로 [from, to] 구하기
-  // TODO: m_manager->transactions() 순회
-  //         matchesType, matchesStatus, matchesDate, matchesMemo 모두 통과한
-  //         것만 수집
-  // TODO: newestFirst 기준으로 정렬
-  Q_UNUSED(options)
-  return {};
-}
-
-qint64 TransactionFilter::sumOf(const QList<Transaction> &txs) const {
-  // TODO: Deposit/TransferIn → +amount, Withdraw/TransferOut → -amount 합산
-  Q_UNUSED(txs)
-  return 0;
-}
-
-qint64 TransactionFilter::totalDeposit(const QList<Transaction> &txs) const {
-  // TODO: type == Deposit || TransferIn 인 것의 amount 합산
-  Q_UNUSED(txs)
-  return 0;
-}
-
-qint64 TransactionFilter::totalWithdraw(const QList<Transaction> &txs) const {
-  // TODO: type == Withdraw || TransferOut 인 것의 amount 합산
-  Q_UNUSED(txs)
-  return 0;
-}
-
-std::pair<QDateTime, QDateTime>
-TransactionFilter::resolveDateRange(const FilterOptions &options) const {
-  // TODO: ThisMonth  → 이번 달 1일 00:00 ~ 말일 23:59
-  // TODO: LastMonth  → 지난 달 1일 00:00 ~ 말일 23:59
-  // TODO: Custom     → options.customFrom / customTo 그대로 사용
-  Q_UNUSED(options)
-  return {QDateTime(), QDateTime()};
-}
-
-bool TransactionFilter::matchesType(const Transaction &tx,
-                                    const QList<TransactionType> &types) const {
-  // TODO: types 비어있으면 true (전체), 아니면 포함 여부
-  Q_UNUSED(tx)
-  Q_UNUSED(types)
-  return true;
-}
-
-bool TransactionFilter::matchesStatus(
-    const Transaction &tx, const QList<TransactionStatus> &statuses) const {
-  // TODO: statuses 비어있으면 true, 아니면 포함 여부
-  Q_UNUSED(tx)
-  Q_UNUSED(statuses)
-  return true;
-}
-
-bool TransactionFilter::matchesDate(const Transaction &tx,
-                                    const QDateTime &from,
-                                    const QDateTime &to) const {
-  // TODO: tx.occurredAt 이 [from, to] 범위 내이면 true
-  Q_UNUSED(tx)
-  Q_UNUSED(from)
-  Q_UNUSED(to)
-  return true;
-}
-
-bool TransactionFilter::matchesMemo(const Transaction &tx,
-                                    const QString &keyword) const {
-  // TODO: keyword 비어있으면 true
-  // TODO: tx.memo.contains(keyword, Qt::CaseInsensitive)
-  Q_UNUSED(tx)
-  Q_UNUSED(keyword)
-  return true;
-}
-
-// =======================================================================
-// MainWindow
-// =======================================================================
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow), m_accountManager(),
-      m_deposit(&m_accountManager), m_withdraw(&m_accountManager),
-      m_transfer(&m_accountManager), m_correction(&m_accountManager),
-      m_filter(&m_accountManager) {
-  ui->setupUi(this);
-
-  // TODO: 초기 계좌 목록을 탭 위젯에 로드
-  // TODO: refreshTransactionList(), refreshSummary() 호출
-}
-
-MainWindow::~MainWindow() { delete ui; }
-
-// ── 버튼 슬롯 ─────────────────────────────────────────────────────────────
-
-void MainWindow::on_pushButton_calc_clicked() // 입금
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
 {
-  // TODO: currentAccountId() 확인
-  // TODO: UI에서 금액, 일시, 메모, 카테고리 읽기
-  // TODO: m_deposit.deposit(...) 호출
-  // TODO: 성공 → refreshTransactionList(), refreshSummary()
-  // TODO: 실패 → showError(...)
+    ui->setupUi(this);
+
+    // TODO: 초기 화면 및 탭 세팅
 }
 
-void MainWindow::on_pushButton_save_clicked() // 출금
+MainWindow::~MainWindow()
 {
-  // TODO: currentAccountId() 확인
-  // TODO: UI에서 금액, 일시, 메모 읽기
-  // TODO: m_withdraw.withdraw(...) 호출
-  // TODO: 성공 → refreshTransactionList(), refreshSummary()
-  // TODO: 실패 → showError(...)
+    delete ui;
 }
 
-void MainWindow::on_pushButton_login_clicked() // 송금
+// ── UI 편의 함수들 ────────────────────────────────────────────────────────
+int MainWindow::currentAccountId() const
 {
-  // TODO: readTransferInput(toAccountId, amount, err) 호출
-  // TODO: m_transfer.transfer(currentAccountId(), toAccountId, amount, ...)
-  // 호출
-  // TODO: 성공 → refreshTransactionList(), refreshSummary()
-  // TODO: 실패 → showError(...)
+    // TODO: 현재 탭의 index를 이용해 m_accounts 의 id 구하기
+    return -1;
 }
 
-void MainWindow::on_pushButton_reset_clicked() // 정정
+void MainWindow::refreshTransactionList()
 {
-  // TODO: 테이블에서 선택된 거래 ID 가져오기
-  // TODO: CorrectionRequest 구성
-  // TODO: m_correction.correctTransaction(txId, req) 호출
-  // TODO: 성공 → refreshTransactionList(), refreshSummary()
-  // TODO: 실패 → showError(...)
+    // TODO: UI (테이블 등) 에 m_transactions 내용을 싹 다 지우고 새로 그리기
 }
 
-void MainWindow::on_pushButton_help_clicked() // 내역 저장
+void MainWindow::refreshSummary()
 {
-  // TODO: QFileDialog 로 저장 경로 선택
-  // TODO: 현재 거래 목록 CSV 등으로 내보내기
+    // TODO: 총 잔고, 현재 계좌 잔고 등을 화면의 lineEdit 에 적어주기
 }
 
-// ── 메뉴 슬롯 ─────────────────────────────────────────────────────────────
-
-void MainWindow::on_actionAccount_View_triggered() // 계좌 조회
+void MainWindow::recalcAllBalances()
 {
-  // TODO: m_accountManager.activeAccounts() 가져오기
-  // TODO: 다이얼로그 또는 패널에 목록 표시
+    // 1. 모든 계좌 잔고를 초기 잔고로 돌림
+    for(auto &acc : m_accounts) {
+        acc.currentBalance = acc.initialBalance;
+    }
+
+    // 2. 모든 거래 내역을 하나씩 돌아가면서 잔고에 더하고 빼기 (초보자형 직관적 로직)
+    for(const auto &tx : m_transactions) {
+        if(tx.status != "정상") continue; // 취소된 내역은 무산됨
+
+        // 이 거래가 발생한 계좌 찾기
+        for(auto &acc : m_accounts) {
+            if(acc.id == tx.accountId) {
+                if(tx.type == "입금") {
+                    acc.currentBalance += tx.amount;
+                } else if(tx.type == "출금" || tx.type == "송금") {
+                    // (송금 기능 구현 방식에 따라 다르겠지만, 내 계좌에서 돈이 빠진다면 출금)
+                    acc.currentBalance -= tx.amount;
+                }
+                break;
+            }
+        }
+    }
 }
 
-void MainWindow::on_actionAdd_triggered() // 계좌 생성
+// ── 메뉴 버튼 클릭 함수들 (계좌 생성/삭제 등) ─────────────────────────────────
+
+void MainWindow::on_actionAdd_triggered()
 {
-  // TODO: 계좌 정보 입력 다이얼로그 (이름, 은행명, 초기 잔고, 정책)
-  // TODO: m_accountManager.createAccount(...) 호출
-  // TODO: 성공 → 탭 위젯에 새 탭 추가, refreshSummary()
-  // TODO: 실패 → showError(...)
+    // 화면(Input)에서 이름, 계좌번호 등 입력값을 가져왔다고 치는 예시 테스트 코드
+    Account accountData;
+    accountData.name = "테스트 계좌";
+    accountData.accountNumber = "123-456-789";   // 이 부분을 UI 텍스트 상자에서 읽어와야 함!
+    
+    QString outError = ""; // 에러 메시지 담을 변수
+
+    // 1. 방금 구성하신 아주 훌륭하고 명료한 예외 체크!
+    if(accountData.accountNumber.isEmpty()) {
+        outError = "계좌 번호가 입력되지 않았습니다.";
+    }
+
+    // 2. for문 돌려서 중복 계좌 찾기 (매니저 클래스 없이 그냥 MainWindow 안에서!)
+    for(const auto &acc : m_accounts)
+    {
+        if(acc.accountNumber == accountData.accountNumber)
+        {
+            outError = "이미 존재하는 계좌 번호입니다.";
+            break;
+        }
+    }
+
+    // 에러가 있다면 알림창 띄우고 아래로 못 내려가게 함수 끝내기
+    if(!outError.isEmpty()) {
+        QMessageBox::warning(this, "경고", outError);
+        return;
+    }
+
+    // 3. 문제가 없다면 멤버 리스트에 진짜 넣기
+    Account newAccount = accountData;
+    newAccount.id = m_nextAccountId++; // 숫자 1 증가시켜서 ID로 줌
+    
+    m_accounts.append(newAccount);
+
+    QMessageBox::information(this, "성공", "계좌가 무사히 생성되었습니다!");
+
+    // TODO: 이 아래에 UI(tabWidget)에도 새 탭 하나 추가해주는 코드 넣기
 }
 
-void MainWindow::on_actionDelete_triggered() // 계좌 탈퇴
+void MainWindow::on_actionDelete_triggered()
 {
-  // TODO: 현재 탭의 계좌 확인 + 취소 확인 다이얼로그
-  // TODO: m_accountManager.deactivateAccount(currentAccountId()) 호출
-  // TODO: 성공 → 탭 제거, refreshSummary()
-  // TODO: 실패 → showError(...)
+    int currentId = currentAccountId();
+    if(currentId == -1) return;
+
+    // 해당 계좌 찾아서 문자열 상태만 "비활성"으로 변경
+    for(auto &acc : m_accounts) {
+        if(acc.id == currentId) {
+            acc.status = "비활성"; // 복잡한 enum 없이 그냥 글씨로!!
+            QMessageBox::information(this, "성공", "계좌가 삭제(비활성) 처리 되었습니다.");
+            break;
+        }
+    }
 }
 
-// ── 탭 변경 슬롯 ──────────────────────────────────────────────────────────
+// ── 주요 기능 버튼 클릭 (입금, 출금, 송금) ───────────────────────────────────
 
-void MainWindow::on_tabWidget_semester_currentChanged(int index) {
-  // TODO: index → accountId 매핑 (탭-계좌 매핑 자료구조 필요)
-  // TODO: refreshTransactionList(), refreshSummary()
-  Q_UNUSED(index)
+void MainWindow::on_pushButton_calc_clicked()   // 입금
+{
+    int currentId = currentAccountId();
+    if(currentId == -1) return;
+
+    // TODO: UI에서 금액, 메모 등 읽어오기
+    qint64 inputAmount = 10000; 
+
+    // 금액 예외 처리
+    if(inputAmount <= 0) {
+        QMessageBox::warning(this, "오류", "입금액은 0보다 커야 합니다.");
+        return;
+    }
+
+    // 1. 거래 내역 구조체 만들기
+    Transaction tx;
+    tx.id = m_nextTransactionId++;
+    tx.accountId = currentId;
+    tx.amount = inputAmount;
+    tx.type = "입금";      // enum 대신 문자 대입!
+    tx.status = "정상";    // enum 대신 문자 대입!
+    
+    // 2. 내역 리스트에 저장
+    m_transactions.append(tx);
+
+    // 3. 잔고 처음부터 다 계산
+    recalcAllBalances();
+    
+    // 4. 화면 새로 쓰기
+    refreshTransactionList();
+    refreshSummary();
+
+    QMessageBox::information(this, "완료", "입금 완료!");
 }
 
-// ── UI 헬퍼 ───────────────────────────────────────────────────────────────
-
-int MainWindow::currentAccountId() const {
-  // TODO: 현재 탭 index → accountId 변환
-  // TODO: 탭 없으면 -1
-  return -1;
+void MainWindow::on_pushButton_save_clicked()   // 출금
+{
+    // 입금과 비슷하게 복사-붙여넣기 하면 됩니다. 
+    // "잔고가 마이너스로 가는지 체크하는 if문"만 하나 더 넣으면 끝입니다!
 }
 
-void MainWindow::refreshTransactionList() {
-  // TODO: FilterOptions 구성 (현재 계좌 ID 등)
-  // TODO: m_filter.query(options) 로 거래 목록 가져오기
-  // TODO: 결과를 UI 행(QDateEdit, QComboBox 등)에 채워 넣기
+void MainWindow::on_pushButton_login_clicked()  // 송금
+{
+    // 출금 한번 하고, 입금 한번 하는 식으로 Transaction 2개를 구조체로 만들어서 append 하면 끝납니다!
 }
 
-void MainWindow::refreshSummary() {
-  // TODO: lineEdit_total_gpa    ← currentBalanceOf(현재 계좌)
-  // TODO: lineEdit_major_gpa   ← 전체 활성 잔고 합산 등 원하는 값
-  // TODO: lineEdit_credits_earned, lineEdit_major_credits 업데이트
+void MainWindow::on_pushButton_reset_clicked()  // 정정 (또는 취소)
+{
+    // UI에서 선택된 거래 ID를 받아서, for문으로 m_transactions에서 찾은 뒤 
+    // status 문자열을 "취소"로 바꾸고 recalcAllBalances() 한 번만 실행하면 모든게 끝나는 마법!
 }
 
-bool MainWindow::readTransferInput(int &toAccountId, qint64 &amount,
-                                   QString &outError) {
-  // TODO: lineEdit_studentId → 계좌번호 읽기 → accountId 변환
-  // TODO: lineEdit_password  → 금액 파싱
-  // TODO: 유효하지 않으면 outError 세팅 후 false
-  Q_UNUSED(toAccountId)
-  Q_UNUSED(amount)
-  outError = "Not implemented";
-  return false;
+void MainWindow::on_pushButton_help_clicked()   // 내역 저장
+{
+    // CSV 파일 내보내기 구현
 }
 
-void MainWindow::showError(const QString &msg) {
-  QMessageBox::warning(this, tr("오류"), msg);
-}
-
-void MainWindow::showInfo(const QString &msg) {
-  QMessageBox::information(this, tr("완료"), msg);
+// ── 탭 바뀔 때 ────────────────────────────────────────────────────────────
+void MainWindow::on_tabWidget_semester_currentChanged(int index)
+{
+    Q_UNUSED(index)
+    refreshTransactionList();
+    refreshSummary();
 }
