@@ -11,6 +11,12 @@ qt_add_executable(SideProject_Account
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
+    account.cpp
+    account.h
+    transaction.cpp
+    transaction.h
+    bankmanager.cpp
+    bankmanager.h
 )
 
 target_link_libraries(SideProject_Account
