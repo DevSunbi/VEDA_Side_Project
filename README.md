@@ -26,21 +26,22 @@ Qt6 / C++17 기반의 개인 계좌 관리 데스크톱 애플리케이션입니
 
 ## 프로젝트 구조
 
+> 모든 클래스/모듈은 `mainwindow.h` · `mainwindow.cpp` 두 파일로 통합되어 있습니다.
+
 ```
 SideProject_Account/
-├── models/
-│   ├── account.h           # Account 구조체, AccountStatus, OverdraftPolicy
-│   └── transaction.h       # Transaction 구조체, TransactionType, TransactionStatus
-├── modules/
-│   ├── accountmanager.h    # 계좌 CRUD / 잔고 계산 / 공유 데이터
-│   ├── depositmodule.h     # 입금 등록 / 수정
-│   ├── withdrawmodule.h    # 출금 등록 / 수정 / 정책 확인
-│   ├── transfermodule.h    # 송금 원자성 처리
-│   ├── transactionfilter.h # 거래 필터 / 정렬 / 합계
-│   ├── balancequery.h      # 잔고 조회 / 시계열 스냅샷
-│   └── correctionmodule.h  # 거래 취소 / 수정 / 롤백
 ├── main.cpp
-├── mainwindow.h / .cpp / .ui
+├── mainwindow.h        # 모델 + 전체 모듈 클래스 선언 + MainWindow 선언
+│                       #   ├── Account, Transaction (구조체/열거형)
+│                       #   ├── AccountManager   — 계좌 CRUD / 잔고 계산
+│                       #   ├── DepositModule    — 입금 등록 / 수정
+│                       #   ├── WithdrawModule   — 출금 등록 / 수정 / 정책
+│                       #   ├── TransferModule   — 송금 원자성 처리
+│                       #   ├── CorrectionModule — 거래 취소 / 수정 / 롤백
+│                       #   ├── TransactionFilter — 거래 필터 / 정렬 / 합계
+│                       #   └── BalanceQuery     — 잔고 조회 / 시계열
+├── mainwindow.cpp      # 위 모든 클래스 구현 + MainWindow 슬롯 구현
+├── mainwindow.ui       # Qt Designer UI 레이아웃
 └── CMakeLists.txt
 ```
 
