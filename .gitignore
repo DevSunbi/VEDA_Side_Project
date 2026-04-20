@@ -1,0 +1,27 @@
+# Build directories
+build/
+.qtcreator/
+
+# CMake cache
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Qt generated
+*.moc
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+
+# Compiled output
+*.exe
+*.dll
+*.so
+*.o
+*.obj
+
+# IDE
+.vs/
+*.user
+*.creator.user
