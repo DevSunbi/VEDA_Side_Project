@@ -131,8 +131,11 @@ public:
     QList<Account>         allAccounts    () const;
 
     // ── 잔고 계산 ────────────────────────────────────────────────────────
-    qint64 currentBalanceOf  (int accountId) const;
-    qint64 totalActiveBalance() const;
+    qint64                 currentBalanceOf  (int accountId) const;
+    qint64                 totalActiveBalance() const;
+    QList<BalanceSnapshot> balanceHistory    (int accountId,
+                                              const QDateTime &from,
+                                              const QDateTime &to) const;
 
     // ── 내부 데이터 접근 (모듈 공유) ─────────────────────────────────────
     QList<Transaction>       &transactions();
@@ -151,6 +154,7 @@ private:
     const Account *findAccount(int accountId) const;
     void recalcBalance   (Account &account) const;
     void recalcAllBalances();
+    static bool validateAmount(qint64 amount, QString *outError);  // 모듈 공유 금액 유효성 검사
 
     friend class DepositModule;
     friend class WithdrawModule;
@@ -167,20 +171,14 @@ class DepositModule
 public:
     explicit DepositModule(AccountManager *manager);
 
-    int  deposit      (int accountId, qint64 amount,
-                       const QDateTime &occurredAt,
-                       const QString &memo     = QString(),
-                       const QString &category = QString(),
-                       QString *outError = nullptr);
-
-    bool updateDeposit(int transactionId, qint64 newAmount,
-                       const QDateTime &newOccurredAt,
-                       const QString &newMemo, const QString &newCategory,
-                       QString *outError = nullptr);
+    int deposit(int accountId, qint64 amount,
+                const QDateTime &occurredAt,
+                const QString &memo     = QString(),
+                const QString &category = QString(),
+                QString *outError = nullptr);
 
 private:
     AccountManager *m_manager;
-    bool validateAmount(qint64 amount, QString *outError) const;
 };
 
 // =======================================================================
@@ -192,20 +190,14 @@ class WithdrawModule
 public:
     explicit WithdrawModule(AccountManager *manager);
 
-    int  withdraw      (int accountId, qint64 amount,
-                        const QDateTime &occurredAt,
-                        const QString &memo = QString(),
-                        QString *outError = nullptr);
-
-    bool updateWithdraw(int transactionId, qint64 newAmount,
-                        const QDateTime &newOccurredAt,
-                        const QString &newMemo,
-                        QString *outError = nullptr);
+    int withdraw(int accountId, qint64 amount,
+                 const QDateTime &occurredAt,
+                 const QString &memo = QString(),
+                 QString *outError = nullptr);
 
 private:
     AccountManager *m_manager;
-    bool validateAmount  (qint64 amount, QString *outError) const;
-    bool checkOverdraft  (int accountId, qint64 amount, QString *outError) const;
+    bool checkOverdraft(int accountId, qint64 amount, QString *outError) const;
 };
 
 // =======================================================================
@@ -273,27 +265,7 @@ private:
 };
 
 // =======================================================================
-// SECTION 9 : BalanceQuery
-// =======================================================================
-
-class BalanceQuery
-{
-public:
-    explicit BalanceQuery(const AccountManager *manager);
-
-    qint64               currentBalance  (int accountId) const;
-    qint64               totalBalance    () const;
-    QList<BalanceSnapshot> balanceHistory(int accountId,
-                                          const QDateTime &from,
-                                          const QDateTime &to) const;
-    QList<Account>       accountSummaries() const;
-
-private:
-    const AccountManager *m_manager;
-};
-
-// =======================================================================
-// SECTION 10 : MainWindow
+// SECTION 9 : MainWindow
 // =======================================================================
 
 class MainWindow : public QMainWindow
@@ -327,12 +299,11 @@ private:
     AccountManager   m_accountManager;
 
     // ── 기능 모듈 ────────────────────────────────────────────────────────
-    DepositModule    m_deposit;
-    WithdrawModule   m_withdraw;
-    TransferModule   m_transfer;
-    CorrectionModule m_correction;
+    DepositModule     m_deposit;
+    WithdrawModule    m_withdraw;
+    TransferModule    m_transfer;
+    CorrectionModule  m_correction;
     TransactionFilter m_filter;
-    BalanceQuery     m_balanceQuery;
 
     // ── UI 헬퍼 ──────────────────────────────────────────────────────────
     int  currentAccountId() const;
