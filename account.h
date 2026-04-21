@@ -16,15 +16,14 @@ struct Account {
     QString     bankName;
     qint64      initialBalance;
     QDateTime   createdAt;
-    
+
     // 상태값들 (enum 대신 그냥 문자열이나 bool로 직관적으로 관리)
     QString     status;         // "활성" 또는 "비활성"
     bool        allowOverdraft; // 거부: false, 허용(마이너스 가능): true
     qint64      currentBalance;
+    QString     password;
 
-    Account() : id(0), initialBalance(0), status("활성"), allowOverdraft(false), currentBalance(0) {
-        createdAt = QDateTime::currentDateTime();
-    }
+    Account();
 };
 
 // =======================================================================
@@ -35,6 +34,14 @@ class AccountModel : public QAbstractTableModel {
 public:
     explicit AccountModel(QObject *parent = nullptr);
 
+    enum Column {
+        NameColumn = 0,
+        NumberColumn,
+        BankColumn,
+        BalanceColumn,
+        ColumnCount
+    };
+
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -43,8 +50,10 @@ public:
     // 데이터를 넣고 빼는 직관적인 함수들
     void addAccount(const Account &acc);
     QList<Account>& accounts();
-    const QList<Account>& accounts() const;
+    //const QList<Account>& accounts() const;
     void updateAll(); // 화면 싹 다 새로고침 하라고 신호 보내기
+    void removeAccount(int row);
+
 
 private:
     QList<Account> m_accounts; // 실제 계좌들이 담길 바구니

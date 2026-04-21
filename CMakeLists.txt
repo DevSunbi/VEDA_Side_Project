@@ -17,6 +17,24 @@ qt_add_executable(SideProject_Account
     transaction.h
     bankmanager.cpp
     bankmanager.h
+    Acc_search.ui
+    add_acc.ui
+    delete_acc.ui
+    AccSearchDialog.h
+    AccSearchDialog.cpp
+    deposit.ui
+    withdraw.ui
+    DepositDialog.h
+    DepositDialog.cpp
+    WithdrawDialog.h
+    WithdrawDialog.cpp
+    AddAccDialog.h
+    AddAccDialog.cpp
+    DeleteAccDialog.h
+    DeleteAccDialog.cpp
+
+
+
 )
 
 target_link_libraries(SideProject_Account
