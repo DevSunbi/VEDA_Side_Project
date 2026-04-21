@@ -6,6 +6,10 @@ AddAccDialog::AddAccDialog(QWidget *parent)
     , ui(new Ui::AddAccDialog)
 {
     ui->setupUi(this);
+    
+    // 비밀번호 보안 마스킹
+    ui->addpass_le->setEchoMode(QLineEdit::Password);
+    ui->addPassRe_le->setEchoMode(QLineEdit::Password);
 }
 
 AddAccDialog::~AddAccDialog()

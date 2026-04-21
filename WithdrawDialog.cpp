@@ -7,6 +7,7 @@ WithdrawDialog::WithdrawDialog(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle("출금");
+    ui->w_pass_le->setEchoMode(QLineEdit::Password);
 }
 
 WithdrawDialog::~WithdrawDialog()

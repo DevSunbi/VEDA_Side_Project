@@ -10,7 +10,8 @@ Transaction::Transaction()
     , memo("")
     , type(TransactionType::Deposit)
     , status(TransactionStatus::Posted)
-, transferGroupId(-1)
+    , transferGroupId(-1)
+    , counterpartyAccount("")
 {
 }
 // 생성자
@@ -27,10 +28,11 @@ int TransactionModel::rowCount(const QModelIndex &parent) const
 }
 
 // 열 개수 반환
-//   0: 일시 / 1: 구분 / 2: 금액 / 3: 메모 / 4: 상태
+//   0: 일시 / 1: 구분 / 2: 거래 계좌 / 3: 금액 / 4: 메모 / 5: 상태
 int TransactionModel::columnCount(const QModelIndex &parent) const
 {
-    return 5;
+    Q_UNUSED(parent);
+    return 6;
 }
 
 // 각 셀의 데이터 반환
@@ -51,15 +53,20 @@ QVariant TransactionModel::data(const QModelIndex &index, int role) const
             case TransactionType::TransferOut: return "송금(출)";
             case TransactionType::TransferIn:  return "송금(입)";
             }
-        case 2: return tx.amount;
-        case 3: return tx.memo;
-        case 4: return tx.status == TransactionStatus::Posted ? "정상" : "취소";
+        case 2: return tx.counterpartyAccount.isEmpty() ? "-" : tx.counterpartyAccount;
+        case 3: return tx.amount;
+        case 4: return tx.memo;
+        case 5: return tx.status == TransactionStatus::Posted ? "정상" : "취소";
         }
     }
 
     // 취소된 거래는 빨간색으로 표시
-    if (role == Qt::ForegroundRole && tx.status == TransactionStatus::Canceled)
-        return QColor(Qt::red);
+    if (role == Qt::ForegroundRole) {
+        if (tx.status == TransactionStatus::Canceled) return QColor(Qt::gray);
+        if (tx.type == TransactionType::Deposit) return QColor(Qt::blue);
+        if (tx.type == TransactionType::Withdraw) return QColor(Qt::red);
+        if (tx.type == TransactionType::TransferIn || tx.type == TransactionType::TransferOut) return QColor(Qt::green);
+    }
 
     return QVariant();
 }
@@ -74,12 +81,33 @@ QVariant TransactionModel::headerData(int section, Qt::Orientation orientation, 
     switch (section) {
     case 0: return "일시";
     case 1: return "구분";
-    case 2: return "금액";
-    case 3: return "메모";
-    case 4: return "상태";
+    case 2: return "거래 대상";
+    case 3: return "금액";
+    case 4: return "메모";
+    case 5: return "상태";
     }
 
     return QVariant();
+}
+
+Qt::ItemFlags TransactionModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid()) return Qt::NoItemFlags;
+    Qt::ItemFlags defaultFlags = QAbstractTableModel::flags(index);
+    if (index.column() == 4) return defaultFlags | Qt::ItemIsEditable; // 메모 편집
+    return defaultFlags;
+}
+
+bool TransactionModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (index.isValid() && role == Qt::EditRole) {
+        if (index.column() == 4) {
+            m_transactions[index.row()].memo = value.toString();
+            emit dataChanged(index, index);
+            return true;
+        }
+    }
+    return false;
 }
 
 // 거래 추가
@@ -102,4 +130,16 @@ void TransactionModel::setTransactions(const QList<Transaction> &list)
     beginResetModel();
     m_transactions = list;
     endResetModel();
+}
+
+// 대상 계좌의 거래 이력 일괄 삭제 (좀비 데이터 방지용)
+void TransactionModel::removeTransactionsByAccountId(int accountId)
+{
+    for (int i = m_transactions.size() - 1; i >= 0; --i) {
+        if (m_transactions[i].accountId == accountId) {
+            beginRemoveRows(QModelIndex(), i, i);
+            m_transactions.removeAt(i);
+            endRemoveRows();
+        }
+    }
 }
