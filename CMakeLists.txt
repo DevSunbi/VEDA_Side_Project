@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 project(SideProject_Account LANGUAGES CXX)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Charts)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Charts Network)
 
 qt_standard_project_setup()
 
@@ -17,6 +17,12 @@ qt_add_executable(SideProject_Account
     transaction.h
     bankmanager.cpp
     bankmanager.h
+    sync_client.cpp
+    sync_client.h
+    sync_server.cpp
+    sync_server.h
+    sync_state.cpp
+    sync_state.h
     Acc_search.ui
     add_acc.ui
     delete_acc.ui
@@ -45,6 +51,7 @@ target_link_libraries(SideProject_Account
         Qt::Core
         Qt::Widgets
         Qt::Charts
+        Qt::Network
 )
 
 install(TARGETS SideProject_Account
