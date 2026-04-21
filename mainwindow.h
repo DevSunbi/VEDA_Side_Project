@@ -2,9 +2,14 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMessageBox>
 #include "bankmanager.h"
 #include "transaction.h"
 #include "AccSearchDialog.h"
+#include "DepositDialog.h"
+#include "WithdrawDialog.h"
+#include "AddAccDialog.h"
+#include "DeleteAccDialog.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -30,22 +35,16 @@ private slots:
 
     // Select_Group 버튼 슬롯
     // 모드 설정만 하고 실제 처리는 Confirm_Btn
-    void on_Deposit_Btn_clicked();      // 입금 모드 설정
-    void on_Withdraw_Btn_clicked();     // 출금 모드 설정
-    void on_Re_Btn_clicked();           // 정정(취소) 처리
+    void on_Deposit_Btn_clicked();      // 입금 처리
+    void on_Withdraw_Btn_clicked();     // 출금 처리
     void on_Save_Btn_clicked();         // 파일 저장
 
     // Transfer_Group 버튼 슬롯
-    // 현재 m_currentType 에 따라 입금 or 출금 처리
     void on_Confirm_Btn_clicked();      // 실제 입금/출금 처리
 
 private:
     Ui::MainWindow *ui;
     BankManager *m_bankManager;     // 모든 로직을 담당하는 매니저
-
-    // 현재 선택된 거래 유형 (Deposit_Btn / Withdraw_Btn 으로 설정)
-    // 초기값은 Deposit
-    TransactionType m_currentType;
 
     // menubar → Check_Acc 에서 인증 후 저장되는 현재 계좌 ID
     // -1 이면 아직 선택된 계좌 없음
@@ -54,5 +53,7 @@ private:
     // UI 보조 함수
     void refreshSummary();              // 화면 잔고 갱신
 };
+
+
 
 #endif // MAINWINDOW_H

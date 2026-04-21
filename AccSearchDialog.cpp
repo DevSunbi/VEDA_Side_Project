@@ -4,7 +4,7 @@
 
 AccSearchDialog::AccSearchDialog(QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::Dialog)
+    , ui(new Ui::AccSearchDialog)
 {
     ui->setupUi(this);
     setWindowTitle("계좌 조회");

@@ -9,8 +9,7 @@ BankManager::BankManager(QObject *parent)
 }
 
 // 계좌 추가
-bool BankManager::addAccount(const QString &name,
-                             const QString &accNum,
+bool BankManager::addAccount(const QString &accNum,
                              const QString &bank,
                              qint64 initial)
 {
@@ -21,7 +20,6 @@ bool BankManager::addAccount(const QString &name,
 
     Account acc;
     acc.id             = m_nextAccountId++;
-    acc.name           = name;
     acc.accountNumber  = accNum;
     acc.bankName       = bank;
     acc.initialBalance = initial;
@@ -31,23 +29,109 @@ bool BankManager::addAccount(const QString &name,
     return true;
 }
 
-// 거래 추가
-void BankManager::addTransaction(int accountId,
-                                 qint64 amount,
-                                 TransactionType type,
-                                 const QString &memo)
+// 입금 처리
+void BankManager::deposit(int accountId,
+                          qint64 amount,
+                          const QString &memo)
 {
     Transaction tx;
-    tx.id         = m_nextTransactionId++;
+    tx.id = m_nextTransactionId++;
     tx.accountId  = accountId;
     tx.amount     = amount;
-    tx.type       = type;
-    tx.memo       = memo;
+    tx.type       = TransactionType::Deposit;
     tx.status     = TransactionStatus::Posted;
+    tx.memo       = memo;
     tx.occurredAt = QDateTime::currentDateTime();
 
     m_transactionModel->addTransaction(tx);
     recalcAllBalances();
+}
+
+//출금 처리
+// 잔고 부족 시 false 반환
+bool BankManager::withdraw(int accountId,
+                           qint64 amount,
+                           const QString &memo)
+{
+    // 잔고 부족 체크
+    for (const auto &acc : m_accountModel->accounts()) {
+        if (acc.id == accountId) {
+            if (acc.currentBalance < amount) return false;
+            break;
+        }
+    }
+
+    Transaction tx;
+    tx.id         = m_nextTransactionId++;
+    tx.accountId  = accountId;
+    tx.amount     = amount;
+    tx.type       = TransactionType::Withdraw;
+    tx.status     = TransactionStatus::Posted;
+    tx.memo       = memo;
+    tx.occurredAt = QDateTime::currentDateTime();
+
+    m_transactionModel->addTransaction(tx);
+    recalcAllBalances();
+    return true;
+}
+
+// 송금 처리 추가
+// 원자성 보장 : TransferOut / TransferIn 두 거래를 동시에 생성
+// transferGroupId 로 두 거래를 묶어서 관리
+bool BankManager::transfer(int fromAccountId,
+                           int toAccountId,
+                           qint64 amount,
+                           const QString &memo)
+{
+    // 동일 계좌 송금 방지
+    if (fromAccountId == toAccountId) return false;
+
+    // 출금 계좌 잔고 부족 체크
+    bool fromExists = false;
+    bool toExists   = false;
+
+    for (const auto &acc : m_accountModel->accounts()) {
+        if (acc.id == fromAccountId) {
+            if (acc.currentBalance < amount) return false;
+            fromExists = true;
+        }
+        if (acc.id == toAccountId) {
+            toExists = true;
+        }
+    }
+
+    // 존재하지 않는 계좌 체크
+    if (!fromExists || !toExists) return false;
+
+    // 송금 쌍 묶음 ID 발급
+    int groupId = m_nextTransferGroupId++;
+
+    // TransferOut : 출금 계좌에서 나가는 거래
+    Transaction txOut;
+    txOut.id              = m_nextTransactionId++;
+    txOut.accountId       = fromAccountId;
+    txOut.amount          = amount;
+    txOut.type            = TransactionType::TransferOut;
+    txOut.status          = TransactionStatus::Posted;
+    txOut.memo            = memo;
+    txOut.occurredAt      = QDateTime::currentDateTime();
+    txOut.transferGroupId = groupId;
+
+    // TransferIn : 입금 계좌로 들어오는 거래
+    Transaction txIn;
+    txIn.id              = m_nextTransactionId++;
+    txIn.accountId       = toAccountId;
+    txIn.amount          = amount;
+    txIn.type            = TransactionType::TransferIn;
+    txIn.status          = TransactionStatus::Posted;
+    txIn.memo            = memo;
+    txIn.occurredAt      = QDateTime::currentDateTime();
+    txIn.transferGroupId = groupId;
+
+    m_transactionModel->addTransaction(txOut);
+    m_transactionModel->addTransaction(txIn);
+    recalcAllBalances();
+    return true;
 }
 
 // 전체 잔고 재계산
@@ -79,4 +163,47 @@ void BankManager::recalcAllBalances()
     }
 
     m_accountModel->updateAll();
+}
+
+// 계좌 삭제
+bool BankManager::removeAccount(int accountId)
+{
+    // ──────────────────────────────────────────────────────────
+    // 1. accountId 로 행 번호(row) 찾기
+    //    AccountModel::removeAccount() 가 row 를 받으니까
+    //    id → row 변환이 필요해요
+    // ──────────────────────────────────────────────────────────
+    const auto &accounts = m_accountModel->accounts();
+    int row = -1;
+    for (int i = 0; i < accounts.size(); i++) {
+        if (accounts[i].id == accountId) {
+            row = i;
+            break;
+        }
+    }
+
+    if (row == -1) return false;
+
+    // ──────────────────────────────────────────────────────────
+    // 2. 해당 계좌의 거래 내역 전부 Canceled 처리
+    // ──────────────────────────────────────────────────────────
+    QList<Transaction> transactions = m_transactionModel->transactions();
+    for (auto &tx : transactions) {
+        if (tx.accountId == accountId) {
+            tx.status = TransactionStatus::Canceled;
+        }
+    }
+    m_transactionModel->setTransactions(transactions);
+
+    // ──────────────────────────────────────────────────────────
+    // 3. 계좌 삭제 (row 로 전달)
+    // ──────────────────────────────────────────────────────────
+    m_accountModel->removeAccount(row);
+
+    // ──────────────────────────────────────────────────────────
+    // 4. 잔고 재계산
+    // ──────────────────────────────────────────────────────────
+    recalcAllBalances();
+
+    return true;
 }

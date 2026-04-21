@@ -50,6 +50,9 @@
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <widget class="QPushButton" name="Deposit_Btn">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
             <string>입금</string>
            </property>
@@ -64,6 +67,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="Withdraw_Btn">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
             <string>출금</string>
            </property>
@@ -139,6 +145,9 @@
          </item>
          <item alignment="Qt::AlignmentFlag::AlignRight">
           <widget class="QPushButton" name="Confirm_Btn">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
             <string>송금</string>
            </property>

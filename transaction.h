@@ -10,7 +10,9 @@
 // 거래 유형을 나타내는 열거형
 enum class TransactionType {
     Deposit,    // 입금
-    Withdraw    // 출금
+    Withdraw,   // 출금
+    TransferOut,    // 송금 출금 (내 계좌에서 나가는 쪽)
+    TransferIn      // 송금 입금 (상대 계좌로 들어오는 쪽)
 };
 
 // 거래 상태를 나타내는 열거형
@@ -30,6 +32,7 @@ struct Transaction {
     QString           memo;         // 메모 (선택)
     TransactionType   type;         // 거래 유형 (입금/출금)
     TransactionStatus status;       // 거래 상태 (정상/취소)
+    int transferGroupId;  // 송금 쌍 묶음 ID (-1이면 해당 없음)
 
     // 기본 생성자 : 안전한 초기값으로 설정
     Transaction();
@@ -45,15 +48,15 @@ public:
     explicit TransactionModel(QObject *parent = nullptr);
 
     // QAbstractTableModel 구현
-    int rowCount(const QModelIndex &parent = QModelIndex())                        const override;
-    int columnCount(const QModelIndex &parent = QModelIndex())                     const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole)                 const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     // 모델 데이터 조작 함수
 
-    void addTransaction(const Transaction &tx);         // 거래 추가
-    const QList<Transaction>& transactions()                          const;  // 전체 거래 목록 반환
+    void addTransaction(const Transaction &tx); // 거래 추가
+    const QList<Transaction>& transactions() const;  // 전체 거래 목록 반환
     void setTransactions(const QList<Transaction> &list); // 거래 목록 교체
 
 private:

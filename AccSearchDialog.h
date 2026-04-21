@@ -5,7 +5,7 @@
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
-class Dialog;
+class AccSearchDialog;
 }
 QT_END_NAMESPACE
 
@@ -23,7 +23,7 @@ public:
     QString getPassword() const;   // 입력된 비밀번호 반환
 
 private:
-    Ui::Dialog *ui;
+    Ui::AccSearchDialog *ui;
 };
 
 #endif // ACCSEARCHDIALOG_H

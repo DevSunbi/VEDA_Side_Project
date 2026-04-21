@@ -10,6 +10,7 @@ Transaction::Transaction()
     , memo("")
     , type(TransactionType::Deposit)
     , status(TransactionStatus::Posted)
+, transferGroupId(-1)
 {
 }
 // 생성자
@@ -43,7 +44,13 @@ QVariant TransactionModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole) {
         switch (index.column()) {
         case 0: return tx.occurredAt.toString("yyyy-MM-dd HH:mm");
-        case 1: return tx.type == TransactionType::Deposit ? "입금" : "출금";
+        case 1:
+            switch (tx.type) {
+            case TransactionType::Deposit:     return "입금";
+            case TransactionType::Withdraw:    return "출금";
+            case TransactionType::TransferOut: return "송금(출)";
+            case TransactionType::TransferIn:  return "송금(입)";
+            }
         case 2: return tx.amount;
         case 3: return tx.memo;
         case 4: return tx.status == TransactionStatus::Posted ? "정상" : "취소";
