@@ -15,6 +15,7 @@
 #include "DepositDialog.h"
 #include "WithdrawDialog.h"
 #include "TransferDialog.h"
+#include <QHeaderView>
 
 // 생성자
 MainWindow::MainWindow(QWidget *parent)
@@ -32,8 +33,9 @@ MainWindow::MainWindow(QWidget *parent)
     // 저장된 데이터 자동 로드
     loadFromFile();
 
-    // 거래 내역 테이블뷰와 계좌별 프록시 모델 연결
+    // 거래 내역 테이블뷰와 계좌별 프록시 모델 연결 및 컬럼 동적(Stretch) 크기 조정
     ui->Acc_tableview->setModel(m_proxyModel);
+    ui->Acc_tableview->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     //계좌 미선택시 버튼 비활성화
     ui->Deposit_Btn->setEnabled(false);
