@@ -10,6 +10,7 @@ BankManager::BankManager(QObject *parent)
 
 // 계좌 추가
 bool BankManager::addAccount(const QString &accNum,
+                             const QString &password,
                              const QString &bank,
                              qint64 initial)
 {
@@ -21,6 +22,7 @@ bool BankManager::addAccount(const QString &accNum,
     Account acc;
     acc.id             = m_nextAccountId++;
     acc.accountNumber  = accNum;
+    acc.password       = password; // [보안] 비밀번호 저장 추가
     acc.bankName       = bank;
     acc.initialBalance = initial;
     acc.currentBalance = initial;
@@ -89,14 +91,19 @@ bool BankManager::transfer(int fromAccountId,
     // 출금 계좌 잔고 부족 체크
     bool fromExists = false;
     bool toExists   = false;
+    
+    QString fromAccNum = "";
+    QString toAccNum = "";
 
     for (const auto &acc : m_accountModel->accounts()) {
         if (acc.id == fromAccountId) {
-            if (acc.currentBalance < amount) return false;
+            if (!acc.allowOverdraft && acc.currentBalance < amount) return false;
             fromExists = true;
+            fromAccNum = acc.accountNumber;
         }
         if (acc.id == toAccountId) {
             toExists = true;
+            toAccNum = acc.accountNumber;
         }
     }
 
@@ -116,6 +123,7 @@ bool BankManager::transfer(int fromAccountId,
     txOut.memo            = memo;
     txOut.occurredAt      = QDateTime::currentDateTime();
     txOut.transferGroupId = groupId;
+    txOut.counterpartyAccount = toAccNum; // 거래 상대(받는 계좌) 추가
 
     // TransferIn : 입금 계좌로 들어오는 거래
     Transaction txIn;
@@ -127,6 +135,7 @@ bool BankManager::transfer(int fromAccountId,
     txIn.memo            = memo;
     txIn.occurredAt      = QDateTime::currentDateTime();
     txIn.transferGroupId = groupId;
+    txIn.counterpartyAccount = fromAccNum; // 거래 상대(보내는 계좌) 추가
 
     m_transactionModel->addTransaction(txOut);
     m_transactionModel->addTransaction(txIn);
@@ -152,9 +161,9 @@ void BankManager::recalcAllBalances()
             continue;
         for (auto &acc : accounts) {
             if (acc.id == tx.accountId) {
-                if (tx.type == TransactionType::Deposit) {
+                if (tx.type == TransactionType::Deposit || tx.type == TransactionType::TransferIn) {
                     acc.currentBalance += tx.amount;
-                } else if (tx.type == TransactionType::Withdraw) {
+                } else if (tx.type == TransactionType::Withdraw || tx.type == TransactionType::TransferOut) {
                     acc.currentBalance -= tx.amount;
                 }
                 break;
@@ -206,4 +215,24 @@ bool BankManager::removeAccount(int accountId)
     recalcAllBalances();
 
     return true;
+}
+
+// JSON 데이터 복원용
+void BankManager::restoreAccount(const Account &acc)
+{
+    m_accountModel->addAccount(acc);
+    if(acc.id >= m_nextAccountId) {
+        m_nextAccountId = acc.id + 1;
+    }
+}
+
+void BankManager::restoreTransaction(const Transaction &tx)
+{
+    m_transactionModel->addTransaction(tx);
+    if(tx.id >= m_nextTransactionId) {
+        m_nextTransactionId = tx.id + 1;
+    }
+    if(tx.transferGroupId >= m_nextTransferGroupId) {
+        m_nextTransferGroupId = tx.transferGroupId + 1;
+    }
 }

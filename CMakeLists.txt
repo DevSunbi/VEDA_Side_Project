@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 project(SideProject_Account LANGUAGES CXX)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Charts)
 
 qt_standard_project_setup()
 
@@ -32,7 +32,9 @@ qt_add_executable(SideProject_Account
     AddAccDialog.cpp
     DeleteAccDialog.h
     DeleteAccDialog.cpp
-
+    transfer.ui
+    TransferDialog.h
+    TransferDialog.cpp
 
 
 )
@@ -41,6 +43,7 @@ target_link_libraries(SideProject_Account
     PRIVATE
         Qt::Core
         Qt::Widgets
+        Qt::Charts
 )
 
 install(TARGETS SideProject_Account

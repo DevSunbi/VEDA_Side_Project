@@ -7,6 +7,7 @@ DepositDialog::DepositDialog(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle("입금");
+    ui->d_pass_le->setEchoMode(QLineEdit::Password);
 }
 
 DepositDialog::~DepositDialog()

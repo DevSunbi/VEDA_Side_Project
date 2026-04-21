@@ -25,8 +25,13 @@ public:
     // 계좌 추가
     // 반환값 - 성공 true / 중복 계좌번호 false
     bool addAccount(const QString &accNum,
+                    const QString &password,
                     const QString &bank,
                     qint64 initial);
+
+    // JSON 데이터 복원용
+    void restoreAccount(const Account &acc);
+    void restoreTransaction(const Transaction &tx);
 
     // 거래 추가
     // type : TransactionType::Deposit or TransactionType::Withdraw

@@ -10,6 +10,29 @@
 #include "WithdrawDialog.h"
 #include "AddAccDialog.h"
 #include "DeleteAccDialog.h"
+#include <QSortFilterProxyModel>
+
+class AccountFilterProxyModel : public QSortFilterProxyModel {
+public:
+    AccountFilterProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent), m_accountId(-1) {}
+    void setAccountId(int id) { 
+        if (m_accountId == id) return;
+        beginResetModel();
+        m_accountId = id; 
+        endResetModel(); 
+    }
+protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override {
+        if (m_accountId == -1) return false;
+        TransactionModel* model = qobject_cast<TransactionModel*>(sourceModel());
+        if(!model) return false;
+        const auto& list = model->transactions();
+        if(sourceRow < 0 || sourceRow >= list.size()) return false;
+        return list[sourceRow].accountId == m_accountId;
+    }
+private:
+    int m_accountId;
+};
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -45,6 +68,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     BankManager *m_bankManager;     // 모든 로직을 담당하는 매니저
+    AccountFilterProxyModel *m_proxyModel; // 거래 내역 계좌별 필터링
 
     // menubar → Check_Acc 에서 인증 후 저장되는 현재 계좌 ID
     // -1 이면 아직 선택된 계좌 없음
@@ -52,6 +76,8 @@ private:
 
     // UI 보조 함수
     void refreshSummary();              // 화면 잔고 갱신
+    void loadFromFile();                // JSON 복원
+    void updateGraph(int accountId);    // 차트 업데이트
 };
 
 

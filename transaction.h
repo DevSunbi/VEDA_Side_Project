@@ -33,6 +33,7 @@ struct Transaction {
     TransactionType   type;         // 거래 유형 (입금/출금)
     TransactionStatus status;       // 거래 상태 (정상/취소)
     int transferGroupId;  // 송금 쌍 묶음 ID (-1이면 해당 없음)
+    QString counterpartyAccount;    // 거래 상대방 계좌 (송금 시)
 
     // 기본 생성자 : 안전한 초기값으로 설정
     Transaction();
@@ -52,12 +53,17 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    
+    // 테이블 수정용 오버라이드
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
     // 모델 데이터 조작 함수
 
     void addTransaction(const Transaction &tx); // 거래 추가
     const QList<Transaction>& transactions() const;  // 전체 거래 목록 반환
     void setTransactions(const QList<Transaction> &list); // 거래 목록 교체
+    void removeTransactionsByAccountId(int accountId); // 대상 계좌 거래내역 일괄 삭제
 
 private:
     QList<Transaction> m_transactions;  // 거래 내역 리스트

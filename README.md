@@ -6,95 +6,92 @@ VEDA 5주차 20-22일 Qt 사이드 프로젝트
 
 # SideProject — 계좌 관리 앱
 
-Qt6 / C++17 기반의 개인 계좌 관리 데스크톱 애플리케이션입니다.
+Qt6 / C++17 기반의 개인 계좌 관리 데스크톱 애플리케이션입니다. 
+최근 리팩터링을 통해 시스템 안정성(좀비 데이터 자가 치유)과 데이터 무결성을 확보하였으며, 입금·출금·송금 기능의 UI를 팝업 다이얼로그 형태로 통일하여 유저 경험을 대폭 개선했습니다. 
 
 ---
 
-## 주요 기능
+## 📸 스크린샷
+
+![메인 화면](./image.png)
+
+
+---
+
+## 🚀 주요 기능
 
 | 기능 | 설명 |
 |------|------|
-| 계좌 관리 | 계좌 생성 / 수정 / 비활성(보관) |
-| 입금 | 입금 거래 등록 및 수정 |
-| 출금 | 잔고 부족 정책 적용(차단 / 마이너스 허용) |
-| 송금(이체) | 출금·입금 원자성 보장, 동일 계좌 간 송금 차단 |
-| 잔고 조회 | 계좌별 / 전체 활성 계좌 합산 잔고 |
-| 거래 내역 | 기간(이번달/지난달/사용자 지정) · 유형 · 계좌 필터 |
-| 거래 취소/수정 | 상태 변경(`canceled`) + 잔고 자동 롤백 |
+| **계좌 관리** | 새로운 계좌 생성 및 보안 비밀번호 설정, 계좌 삭제 기능 |
+| **입금 & 출금** | 팝업 다이얼로그 기반의 직관적인 뱅킹 시스템. 출금 시 잔액 검증 방어 로직 가동 |
+| **송금 (이체)** | 출금 계좌와 입금 계좌 양방향 로그의 원자성(Atomicity) 보장. 거래 대상(Counterparty) 기능 추가 |
+| **거래 내역 & 잔고** | 대상 계좌별 거래 내역 실시간 테이블 추적. `QSortFilterProxyModel` 기반의 즉각적 뷰어 동기화 |
+| **실시간 차트 분석** | Qt Charts 라이브러리를 활용한 계좌 자금 변동 내역 시각화 (동적 Min/Max 스케일링 자동 계산 지원) |
+| **강력한 데이터 보존** | JSON 기반 영속성 저장 시스템 기능 및 **오염된 고아(Zombie) 거래내역을 로드 시 자동 폐기하는 `Self-Healing` 무결성 보장 로직** 탑재 |
 
 ---
 
-## 프로젝트 구조
+## 🛠 프로젝트 구조
 
-> 파일들이 역할별로 모듈화되어 분리되었습니다.
+> 단일 `MainWindow` 아키텍처에 기초하되 다양한 팝업 UI 창 모듈과 비즈니스 로직(`BankManager`)이 결합된 구조입니다.
 
-```
+```text
 SideProject_Account/
 ├── main.cpp
-├── mainwindow.h / cpp      # 메인 UI 화면 클래스 (사용자 이벤트 및 UI 업데이트 처리)
-├── bankmanager.h / cpp     # 핵심 업무 매니저 (계좌 및 거래 내역 로직 담당)
-├── models.h                # 계좌(AccountModel), 거래 내역(TransactionModel) Qt 모델 클래스
-├── account.h / (cpp)       # 계좌 구조체 및 관련 선언
-├── transaction.h / (cpp)   # 거래 구조체 및 관련 선언
-├── mainwindow.ui           # Qt Designer UI 레이아웃
-└── CMakeLists.txt
+├── mainwindow.h / cpp         # 메인 뷰어 및 UI 허브 (Qt 차트 렌더링, JSON 로드/세이브 등)
+├── bankmanager.h / cpp        # 핵심 데이터 비즈니스 로직 매니저 (송금 및 연산 통제)
+├── account.h / cpp            # 계좌(AccountModel) 데이터와 내부 Qt 모델 클래스 (QAbstractListModel)
+├── transaction.h / cpp        # 거래 내역(TransactionModel) 데이터와 내부 Qt 모델 클래스 (QAbstractTableModel)
+├── UI Layouts/
+│   ├── mainwindow.ui          # 통합 메인 뷰어
+│   ├── add_acc.ui / delete_acc.ui / Acc_search.ui
+│   ├── deposit.ui / withdraw.ui / transfer.ui  # 입금, 출금, 송금 팝업
+├── Dialog Controllers/                   
+│   ├── AddAccDialog.h / cpp
+│   ├── DeleteAccDialog.h / cpp
+│   ├── DepositDialog.h / cpp
+│   ├── WithdrawDialog.h / cpp
+│   ├── TransferDialog.h / cpp # 신규 추가된 통합 송금 다이얼로그 모듈
+└── CMakeLists.txt             # 빌드 컴파일 명세 파일
 ```
 
 ---
 
-## 데이터 모델
+## 💾 데이터 모델 로직 (JSON DB)
 
-### Account
-| 필드 | 타입 | 설명 |
-|------|------|------|
-| `id` | `int` | 내부 고유 ID |
-| `name` | `QString` | 계좌명 |
-| `accountNumber` | `QString` | 계좌 번호 (옵션) |
-| `bankName` | `QString` | 은행명 (옵션) |
-| `initialBalance` | `qint64` | 초기 잔고 |
-| `createdAt` | `QDateTime` | 생성일 |
-| `status` | `AccountStatus` | Active / Inactive |
-| `overdraftPolicy` | `OverdraftPolicy` | Deny / Allow |
-| `currentBalance` | `qint64` | 계산된 현재 잔고 |
+### Account (계좌)
+- `id` : 내부 고유 식별자 (`BankManager` 내부 발급 번호)
+- `accountNumber` : 계좌 번호 (조회용 PK 역할)
+- `password` : 결제 인증용 비밀번호 (인증 기능 추가)
+- `initialBalance` / `currentBalance` : 최초 개설 잔고 및 계산된 현재 잔여 잔고 반영 치
+- `createdAt` : 계좌 개설 일시
 
-### Transaction
-| 필드 | 타입 | 설명 |
-|------|------|------|
-| `id` | `int` | 내부 고유 ID |
-| `accountId` | `int` | 연결 계좌 ID |
-| `type` | `TransactionType` | Deposit / Withdraw / TransferOut / TransferIn |
-| `status` | `TransactionStatus` | Posted / Canceled |
-| `amount` | `qint64` | 금액 (항상 양수) |
-| `occurredAt` | `QDateTime` | 거래 일시 |
-| `memo` | `QString` | 메모 (옵션) |
-| `category` | `QString` | 입금 사유 (옵션) |
-| `transferGroupId` | `int` | 송금 쌍 묶음 ID |
+### Transaction (거래 내역)
+- `id` : 거래 고유 번호
+- `accountId` : 거래가 속한 원본 계좌의 식별자
+- `type` : `Deposit`, `Withdraw`, `TransferOut`, `TransferIn`
+- `status` : `Posted` (정상 거래), `Canceled` (삭제된 계좌의 파기된 거래)
+- `counterpartyAccount` : 송금 및 이체 시 상대방 계좌 번호 정보 보존
+- `occurredAt` : 거래 발생 일시
 
 ---
 
-## 잔고 계산 원칙
+## ⚙️ 빌드 및 실행 환경
 
-```
-현재 잔고 = initialBalance + Σ(입금/TransferIn) - Σ(출금/TransferOut)
-          단, status == Canceled 인 거래는 제외
-```
-
----
-
-## 빌드 환경
-
-- **Qt** : 6.x
+- **UI Framework** : Qt 6.5+ (진입점: Qt Widgets, Qt Charts)
 - **C++ Standard** : C++17
-- **Build System** : CMake 3.16+
+- **Build System** : CMake 3.19+ (MinGW 32-make)
 - **IDE** : Qt Creator
 
 ```bash
-cmake -S . -B build
-cmake --build build
+mkdir build
+cd build
+cmake ..
+cmake --build .
 ```
 
 ---
 
-## 라이선스
+## 📜 라이선스
 
 Personal side project — All rights reserved.
