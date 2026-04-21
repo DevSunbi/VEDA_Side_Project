@@ -32,7 +32,9 @@ qt_add_executable(SideProject_Account
     AddAccDialog.cpp
     DeleteAccDialog.h
     DeleteAccDialog.cpp
-
+    transfer.ui
+    TransferDialog.h
+    TransferDialog.cpp
 
 
 )

@@ -12,6 +12,9 @@
 #include <QtCharts/QDateTimeAxis>
 #include <QVBoxLayout>
 #include <QInputDialog>
+#include "DepositDialog.h"
+#include "WithdrawDialog.h"
+#include "TransferDialog.h"
 
 // 생성자
 MainWindow::MainWindow(QWidget *parent)
@@ -24,8 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_proxyModel = new AccountFilterProxyModel(this);
     m_proxyModel->setSourceModel(m_bankManager->transactionModel());
 
-    // 메인 화면 UI 비밀번호 모드 마스킹
-    ui->Password_lbl->setEchoMode(QLineEdit::Password);
+    // 메인 화면 UI 비밀번호 모드 마스킹 (삭제됨)
 
     // 저장된 데이터 자동 로드
     loadFromFile();
@@ -94,7 +96,7 @@ void MainWindow::on_Check_Acc_triggered()
         }
 
         m_selectedAccountId = accountId;
-        ui->Sel_acc->setText("선택된 계좌 : " + accountNumber);
+        ui->Sel_acc->setText(accountNumber);
 
         //계좌 선택 시 버튼 활성화
         ui->Deposit_Btn->setEnabled(true);
@@ -259,12 +261,6 @@ void MainWindow::on_Withdraw_Btn_clicked()
 }
 
 // [슬롯] on_Confirm_Btn_clicked()
-// 현재 m_currentType 에 따라 입금 or 출금 처리
-// 처리 순서 :
-//   1. 계좌 선택 여부 확인
-//   2. 금액 입력값 수집 및 유효성 검사
-//   3. BankManager 에 거래 추가
-//   4. 결과 라벨 반영
 void MainWindow::on_Confirm_Btn_clicked()
 {
     // 1. 계좌 선택 여부 확인
@@ -273,33 +269,31 @@ void MainWindow::on_Confirm_Btn_clicked()
         return;
     }
 
-    // 2. 금액 입력값 수집 및 유효성 검사
-    QString toAccountNumber = ui->AccountID_lbl->text().trimmed();
-    QString password        = ui->Password_lbl->text().trimmed();
-    QString amountStr       = ui->Amount_lbl->text().trimmed();
+    TransferDialog dlg(this);
+    if (dlg.exec() == QDialog::Accepted) {
+        QString toAccountNumber = dlg.getToAccountNumber().trimmed();
+        QString password        = dlg.getPassword().trimmed();
+        qint64  amount          = dlg.getAmount();
 
-    // 3. 유효성 검사
-    if (toAccountNumber.isEmpty() || password.isEmpty() || amountStr.isEmpty()) {
-        QMessageBox::warning(this, "입력 오류", "모든 항목을 입력해주세요.");
-        return;
-    }
-
-    bool ok;
-    qint64 amount = amountStr.toLongLong(&ok);
-
-    if (!ok || amount <= 0) {
-        QMessageBox::warning(this, "입력 오류", "올바른 금액을 입력해주세요.");
-        return;
-    }
-
-    // 타겟 계좌 존재 여부 확인
-    int toAccountId = -1;
-    for (const auto &acc : m_bankManager->accountModel()->accounts()) {
-        if (acc.accountNumber == toAccountNumber) {
-            toAccountId = acc.id;
-            break;
+        // 2. 유효성 검사
+        if (toAccountNumber.isEmpty() || password.isEmpty()) {
+            QMessageBox::warning(this, "입력 오류", "모든 항목을 입력해주세요.");
+            return;
         }
-    }
+
+        if (amount <= 0) {
+            QMessageBox::warning(this, "입력 오류", "올바른 금액을 입력해주세요.");
+            return;
+        }
+
+        // 타겟 계좌 존재 여부 확인
+        int toAccountId = -1;
+        for (const auto &acc : m_bankManager->accountModel()->accounts()) {
+            if (acc.accountNumber == toAccountNumber) {
+                toAccountId = acc.id;
+                break;
+            }
+        }
 
     if (toAccountId == -1) {
         QMessageBox::warning(this, "계좌 오류", "존재하지 않는 계좌번호입니다.");
@@ -344,12 +338,8 @@ void MainWindow::on_Confirm_Btn_clicked()
     ui->Acc_r_lbl->setText(fromAccountNumber + " ➔ " + toAccountNumber);
     ui->History_r_lbl->setText("송금  -" + QString::number(amount) + " 원");
 
-    // 입력 필드 초기화
-    ui->AccountID_lbl->clear();
-    ui->Password_lbl->clear();
-    ui->Amount_lbl->clear();
-
     refreshSummary();
+    }
 }
 
 
