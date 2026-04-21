@@ -40,6 +40,8 @@ private:
     // ── UI 보조 함수 (구현 힌트) ──
     int currentAccountId() const;    // [TODO] 현재 선택된 탭의 계좌 ID를 가져오는 함수
     void refreshSummary();           // [TODO] 화면에 잔고 숫자를 다시 써주는 함수
+    void loadFromFile();             // [추가] JSON에서 계좌 복원
+    void updateGraph(int accountId); // [추가] 자금 운용 현황 차트 업데이트
 };
 
 #endif // MAINWINDOW_H

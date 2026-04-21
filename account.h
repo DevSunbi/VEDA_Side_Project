@@ -21,6 +21,7 @@ struct Account {
     QString     status;         // "활성" 또는 "비활성"
     bool        allowOverdraft; // 거부: false, 허용(마이너스 가능): true
     qint64      currentBalance;
+    QString     password;
 
     Account();
 };

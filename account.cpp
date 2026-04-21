@@ -5,7 +5,7 @@
 // Account 구조체 구현 (생성자)
 // =======================================================================
 Account::Account() 
-    : id(0), initialBalance(0), status("활성"), allowOverdraft(false), currentBalance(0) 
+    : id(0), initialBalance(0), status("활성"), allowOverdraft(false), currentBalance(0), password("")
 {
     createdAt = QDateTime::currentDateTime();
 }

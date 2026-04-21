@@ -6,7 +6,7 @@ BankManager::BankManager(QObject *parent) : QObject(parent) {
     m_transactionModel = new TransactionModel(this);
 }
 
-bool BankManager::addAccount(const QString &accNum, qint64 initial) {
+bool BankManager::addAccount(const QString &accNum, qint64 initial, const QString &password) {
     // 중복 체크
     for(const auto &acc : m_accountModel->accounts()) {
         if(acc.accountNumber == accNum) return false;
@@ -17,9 +17,17 @@ bool BankManager::addAccount(const QString &accNum, qint64 initial) {
     acc.accountNumber = accNum;
     acc.initialBalance = initial;
     acc.currentBalance = initial;
+    acc.password = password;
 
     m_accountModel->addAccount(acc);
     return true;
+}
+
+void BankManager::restoreAccount(const Account &acc) {
+    m_accountModel->addAccount(acc);
+    if(acc.id >= m_nextAccountId) {
+        m_nextAccountId = acc.id + 1;
+    }
 }
 
 void BankManager::addTransaction(int accountId, qint64 amount, const QString &type, const QString &memo, const QString &category) {
