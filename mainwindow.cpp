@@ -28,14 +28,124 @@ MainWindow::MainWindow(QWidget *parent)
     m_proxyModel = new AccountFilterProxyModel(this);
     m_proxyModel->setSourceModel(m_bankManager->transactionModel());
 
+    // [레이아웃 조정] 가로 비율을 원래대로 복구하여 데이터 잘림 방지 (Table:Btn:Graph = 3:1:3)
+    ui->Top_Lay->setColumnStretch(0, 3);
+    ui->Top_Lay->setColumnStretch(1, 1);
+    ui->Top_Lay->setColumnStretch(2, 3);
+
+    // [그래프 확대] 결과창 내에서 그래프가 차지하는 세로 비중을 대폭 확대 (결과텍스트:그래프 = 1:12)
+    ui->verticalLayout_5->setStretch(0, 1);
+    ui->verticalLayout_5->setStretch(1, 12);
+
     // 메인 화면 UI 비밀번호 모드 마스킹 (삭제됨)
 
     // 저장된 데이터 자동 로드
     loadFromFile();
 
-    // 거래 내역 테이블뷰와 계좌별 프록시 모델 연결 및 컬럼 동적(Stretch) 크기 조정
+    // 거래 내역 테이블뷰 설정: 글자 잘림 방지 (핵심 컬럼은 내용에 맞게, 메모만 늘림)
     ui->Acc_tableview->setModel(m_proxyModel);
-    ui->Acc_tableview->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->Acc_tableview->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->Acc_tableview->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Stretch); // 메모 컬럼만 늘림
+    ui->Acc_tableview->verticalHeader()->setVisible(false);
+
+    /* [True Toss Light Style] 최종 고도화 버전 */
+    QString tossLightStyle = R"(
+        /* 전역 폰트 및 배경 */
+        QWidget { 
+            background-color: #F2F4F6; 
+            color: #191F28; 
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; 
+        }
+
+        /* 메인 윈도우 */
+        QMainWindow, QWidget#centralwidget, QDialog { 
+            background-color: #F2F4F6; 
+        }
+
+        /* 카드 (그룹박스): 센터 타이틀 및 여백 강화 */
+        QGroupBox { 
+            background-color: #FFFFFF; 
+            border: none; 
+            border-radius: 28px; 
+            margin: 12px;
+            font-weight: bold; 
+            padding: 25px;
+        }
+        QGroupBox::title { 
+            subcontrol-origin: padding; 
+            subcontrol-position: top center; 
+            padding-top: 15px;
+            color: #4E5968; 
+            font-size: 13pt; 
+            font-weight: 800;
+        }
+
+        /* 버튼 가시성 확대 */
+        QPushButton { 
+            background-color: #3182F6; 
+            color: white; 
+            border: none; 
+            border-radius: 16px; 
+            padding: 12px; 
+            font-weight: bold; 
+            font-size: 14pt; /* [확대] 글씨 크기 키움 */
+            min-height: 45px; 
+        }
+        QPushButton:hover { background-color: #5195F8; }
+        QPushButton:disabled { background-color: #E5E8EB; color: #ADB5BD; }
+
+        /* 테이블 뷰 클린업 */
+        QTableView { 
+            background-color: #FFFFFF; 
+            border: none; 
+            gridline-color: transparent; 
+            selection-background-color: #F2F4F6; 
+            selection-color: #3182F6;
+            outline: none;
+        }
+        QHeaderView::section { 
+            background-color: #FFFFFF; 
+            color: #8B95A1; 
+            padding: 12px; 
+            border: none; 
+            border-bottom: 1px solid #F2F4F6;
+            font-weight: bold;
+        }
+
+        /* 결과창 라벨 완전 투명화 */
+        QLabel#Date_r_lbl, QLabel#Acc_r_lbl, QLabel#Date_lbl, QLabel#Acc_lbl {
+            background-color: transparent;
+            border: none;
+            padding: 5px;
+        }
+        /* 중첩된 그래프 그룹박스의 여백 제거 (그래프 크기 극대화) */
+        /* 중첩된 그래프/결과 그룹박스의 여백 및 제목 정리 (겹침 방지) */
+        QGroupBox#Graph_Group, QGroupBox#ResultGroup {
+            padding-top: 15px; /* 제목 대신 공간 확보 */
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-bottom: 0px;
+            margin: 0px;
+            background-color: transparent;
+        }
+        QGroupBox#Graph_Group::title, QGroupBox#ResultGroup::title { 
+            height: 0px; 
+            color: transparent;  /* 겹침의 원인인 제목 숨김 */
+        }
+
+        /* 상단 네비게이션용 모든 라벨 */
+        QLabel#label, QLabel#Sel_acc, QLabel#CBal_lbl, QLabel#CBal_f_lbl, QLabel#History_lbl, QLabel#History_r_lbl { 
+            font-weight: 800; 
+            font-size: 13pt; 
+            color: #3182F6; 
+            background: transparent;
+            padding: 0 3px;
+        }
+        
+        /* 카드 및 전역 라벨 기본색 */
+        QLabel { color: #191F28; }
+    )";
+    this->setStyleSheet(tossLightStyle);
 
     //계좌 미선택시 버튼 비활성화
     ui->Deposit_Btn->setEnabled(false);
@@ -668,9 +778,25 @@ void MainWindow::updateGraph(int accountId) {
     chart->addSeries(series);
     chart->legend()->hide();
 
+    // Toss 라이트 스타일 그래프 데코레이션
+    chart->setTheme(QChart::ChartThemeLight);
+    chart->setBackgroundVisible(false); // 배경 투명화
+    
+    // [가시성 개선] 아주 미니멀한 마진으로 그래프 영역 최대 확보
+    chart->setMargins(QMargins(5, 5, 5, 5));
+
+    QPen pen(QColor("#3182F6")); // Toss Blue
+    pen.setWidth(4);
+    pen.setCapStyle(Qt::RoundCap);
+    pen.setJoinStyle(Qt::RoundJoin);
+    series->setPen(pen);
+    
+    // 점(Point) 표시를 추가하여 좀 더 모던하게
+    series->setPointsVisible(true);
+    series->setPointLabelsVisible(false);
+
     // ──────────────────────────────────────────
     // X축, Y축 최솟값/최댓값 자동 계산 및 적용
-    // Qt Charts는 커스텀 축 사용 시 범위를 반드시 수동으로 지정해야 합니다.
     // ──────────────────────────────────────────
     qint64 minBal = 0, maxBal = 0;
     QDateTime minTime = QDateTime::currentDateTime();
@@ -693,12 +819,11 @@ void MainWindow::updateGraph(int accountId) {
         minBal -= 10000;
         maxBal += 10000;
     } else {
-        qint64 padding = (maxBal - minBal) * 0.1;
+        qint64 padding = (maxBal - minBal) * 0.2;
         minBal -= padding;
         maxBal += padding;
     }
-    
-    // 점이 1개이거나 시간이 완전히 동일할 때
+
     if (minTime >= maxTime) {
         minTime = minTime.addSecs(-3600);
         maxTime = maxTime.addSecs(3600);
@@ -706,21 +831,32 @@ void MainWindow::updateGraph(int accountId) {
 
     QDateTimeAxis *axisX = new QDateTimeAxis;
     axisX->setTickCount(4);
-    axisX->setFormat("MM/dd hh:mm");
+    axisX->setFormat("MM/dd");
+    axisX->setLabelsColor(QColor("#4E5968"));
+    axisX->setGridLineColor(QColor("#F2F4F6"));
     axisX->setRange(minTime, maxTime);
     chart->addAxis(axisX, Qt::AlignBottom);
     series->attachAxis(axisX);
 
     QValueAxis *axisY = new QValueAxis;
     axisY->setLabelFormat("%d");
+    axisY->setLabelsColor(QColor("#4E5968"));
+    axisY->setGridLineColor(QColor("#F2F4F6"));
+    // 폰트 크기 조정으로 잘림 방지
+    QFont axisFont("Segoe UI", 9);
+    axisX->setLabelsFont(axisFont);
+    axisY->setLabelsFont(axisFont);
+
     axisY->setRange(minBal, maxBal);
     chart->addAxis(axisY, Qt::AlignLeft);
     series->attachAxis(axisY);
 
     QChartView *chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
+    chartView->setStyleSheet("background: transparent;");
 
     QVBoxLayout *layout = new QVBoxLayout(ui->Graph_Widget);
-    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setContentsMargins(0, 0, 0, 0); 
+    ui->Graph_Widget->setMinimumHeight(250); // 최소 높이 보장
     layout->addWidget(chartView);
 }

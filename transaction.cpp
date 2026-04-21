@@ -60,12 +60,23 @@ QVariant TransactionModel::data(const QModelIndex &index, int role) const
         }
     }
 
-    // 취소된 거래는 빨간색으로 표시
+    // ──────────────────────────────────────────
+    // [UI 고도화] 토스 스타일: 무지개 색상을 버리고 가독성 위주로 정리
+    // ──────────────────────────────────────────
     if (role == Qt::ForegroundRole) {
-        if (tx.status == TransactionStatus::Canceled) return QColor(Qt::gray);
-        if (tx.type == TransactionType::Deposit) return QColor(Qt::blue);
-        if (tx.type == TransactionType::Withdraw) return QColor(Qt::red);
-        if (tx.type == TransactionType::TransferIn || tx.type == TransactionType::TransferOut) return QColor(Qt::green);
+        // 1. 취소된 거래는 전체 회색 처리
+        if (tx.status == TransactionStatus::Canceled) return QColor("#ADB5BD");
+
+        // 2. '금액' 컬럼(3번)만 포인트 색상 적용
+        if (index.column() == 3) {
+            if (tx.type == TransactionType::Deposit || tx.type == TransactionType::TransferIn)
+                return QColor("#3182F6"); // Toss Blue (입금)
+            else
+                return QColor("#F04452"); // Toss Red (출금)
+        }
+        
+        // 3. 나머지는 토스 블랙 색상
+        return QColor("#191F28");
     }
 
     return QVariant();

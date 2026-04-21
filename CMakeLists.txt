@@ -35,6 +35,7 @@ qt_add_executable(SideProject_Account
     transfer.ui
     TransferDialog.h
     TransferDialog.cpp
+    resources.qrc
 
 
 )

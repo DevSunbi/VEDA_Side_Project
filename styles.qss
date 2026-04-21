@@ -1,0 +1,151 @@
+/* Toss Style Premium Dark QSS */
+
+/* 전역 설정 */
+QWidget {
+    background-color: #101012;
+    color: #FFFFFF;
+    font-family: "Segoe UI", "맑은 고딕", sans-serif;
+}
+
+/* 메인 윈도우 및 중앙 위젯 강제 배경 적용 */
+QMainWindow, QWidget#centralwidget {
+    background-color: #101012;
+}
+
+/* 다이얼로그 배경 */
+QDialog {
+    background-color: #101012;
+}
+
+/* 그룹 박스 (카드 레이아웃) */
+QGroupBox {
+    background-color: #1C1C1E;
+    border: none;
+    border-radius: 12px;
+    margin-top: 24px;
+    font-weight: bold;
+    padding: 15px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top center;
+    padding: 0 10px;
+    color: #ADB5BD;
+    font-size: 11pt;
+}
+
+/* 버튼 스타일 (Toss Blue) */
+QPushButton {
+    background-color: #3182F6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: bold;
+    min-height: 30px;
+}
+
+QPushButton:hover {
+    background-color: #5195F8;
+}
+
+QPushButton:pressed {
+    background-color: #1B64DA;
+}
+
+QPushButton:disabled {
+    background-color: #2C2C2E;
+    color: #636366;
+}
+
+/* 보조 버튼 스타일 (파일 저장 등) */
+QPushButton#Save_Btn {
+    background-color: #2C2C2E;
+    color: #ADB5BD;
+}
+
+QPushButton#Save_Btn:hover {
+    background-color: #3A3A3C;
+}
+
+/* 테이블 뷰 (현대적 플랫 디자인) */
+QTableView {
+    background-color: #1C1C1E;
+    alternate-background-color: #242426;
+    border: none;
+    gridline-color: transparent;
+    selection-background-color: #3182F6;
+    selection-color: white;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+QHeaderView::section {
+    background-color: #1C1C1E;
+    color: #ADB5BD;
+    padding: 8px;
+    border: none;
+    font-weight: bold;
+    border-bottom: 1px solid #2C2C2E;
+}
+
+/* 스크롤바 커스텀 */
+QScrollBar:vertical {
+    border: none;
+    background: #101012;
+    width: 8px;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: #48484A;
+    min-height: 20px;
+    border-radius: 4px;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+}
+
+/* 라벨 */
+QLabel {
+    color: #F8F9FA;
+}
+
+QLabel#Sel_acc, QLabel#CBal_f_lbl, QLabel#History_r_lbl {
+    font-weight: bold;
+    font-size: 12pt;
+    color: #3182F6;
+}
+
+/* 메뉴바 */
+QMenuBar {
+    background-color: #101012;
+    border-bottom: 1px solid #2C2C2E;
+}
+
+QMenuBar::item {
+    padding: 5px 10px;
+    background: transparent;
+}
+
+QMenuBar::item:selected {
+    background: #2C2C2E;
+    border-radius: 4px;
+}
+
+QMenu {
+    background-color: #1C1C1E;
+    border: 1px solid #2C2C2E;
+    border-radius: 8px;
+}
+
+QMenu::item {
+    padding: 8px 20px;
+}
+
+QMenu::item:selected {
+    background-color: #3182F6;
+}
