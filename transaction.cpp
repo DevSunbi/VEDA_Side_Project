@@ -1,25 +1,20 @@
 #include "transaction.h"
 
-// [생성자] Transaction::Transaction()
-
 Transaction::Transaction()
-    : id(-1)
-    , accountId(-1)
-    , amount(0)
-    , occurredAt(QDateTime::currentDateTime())
-    , memo("")
-    , type(TransactionType::Deposit)
-    , status(TransactionStatus::Posted)
-    , transferGroupId(-1)
-    , counterpartyAccount("")
+    :id(-1)
+    ,accountId(-1)
+    ,amount(0)
+    ,occurredAt(QDateTime::currentDateTime())
+    ,memo("")
+    ,type(TransactionType::Deposit)
+    ,status(TransactionStatus::Posted)
+    ,transferGroupId(-1)
+    ,counterpartyAccount("")
 {
 }
 // 생성자
-
 TransactionModel::TransactionModel(QObject *parent)
-    : QAbstractTableModel(parent)
-{
-}
+    : QAbstractTableModel(parent){}
 
 // 행 개수 반환 : 거래 내역 리스트 크기
 int TransactionModel::rowCount(const QModelIndex &parent) const
@@ -28,7 +23,7 @@ int TransactionModel::rowCount(const QModelIndex &parent) const
 }
 
 // 열 개수 반환
-//   0: 일시 / 1: 구분 / 2: 거래 계좌 / 3: 금액 / 4: 메모 / 5: 상태
+// 0: 일시 / 1: 구분 / 2: 거래 계좌 / 3: 금액 / 4: 메모 / 5: 상태
 int TransactionModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
@@ -60,9 +55,6 @@ QVariant TransactionModel::data(const QModelIndex &index, int role) const
         }
     }
 
-    // ──────────────────────────────────────────
-    // [UI 고도화] 토스 스타일: 무지개 색상을 버리고 가독성 위주로 정리
-    // ──────────────────────────────────────────
     if (role == Qt::ForegroundRole) {
         // 1. 취소된 거래는 전체 회색 처리
         if (tx.status == TransactionStatus::Canceled) return QColor("#ADB5BD");
@@ -70,12 +62,12 @@ QVariant TransactionModel::data(const QModelIndex &index, int role) const
         // 2. '금액' 컬럼(3번)만 포인트 색상 적용
         if (index.column() == 3) {
             if (tx.type == TransactionType::Deposit || tx.type == TransactionType::TransferIn)
-                return QColor("#3182F6"); // Toss Blue (입금)
+                return QColor("#3182F6"); // Blue (입금)
             else
-                return QColor("#F04452"); // Toss Red (출금)
+                return QColor("#F04452"); // Red (출금)
         }
         
-        // 3. 나머지는 토스 블랙 색상
+        // 3. Default : Black
         return QColor("#191F28");
     }
 
@@ -83,7 +75,6 @@ QVariant TransactionModel::data(const QModelIndex &index, int role) const
 }
 
 // 테이블 헤더 텍스트 반환
-// category 제거로 헤더도 5개로 변경
 QVariant TransactionModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole || orientation != Qt::Horizontal)
@@ -101,6 +92,7 @@ QVariant TransactionModel::headerData(int section, Qt::Orientation orientation, 
     return QVariant();
 }
 
+// 거래 내역 테이블에서 메모(4번 열)만 편집 가능하도록 허용
 Qt::ItemFlags TransactionModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid()) return Qt::NoItemFlags;
@@ -109,6 +101,7 @@ Qt::ItemFlags TransactionModel::flags(const QModelIndex &index) const
     return defaultFlags;
 }
 
+// 메모(4번 열) 편집 시 실제 데이터에 반영하고 뷰에 변경을 알림
 bool TransactionModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (index.isValid() && role == Qt::EditRole) {

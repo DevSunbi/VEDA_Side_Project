@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent)
     , m_selectedAccountId(-1)                   // 초기값 : 선택된 계좌 없음
 {
     ui->setupUi(this);
+    // connect 없이 setupUi(this) 가 on_위젯이름_시그널이름() 규칙을 자동으로 connect 를 대신 처리
+    // 대신 이름 규칙 철저히 지켜야됨.
     m_bankManager = new BankManager(this);
     m_proxyModel = new AccountFilterProxyModel(this);
     m_proxyModel->setSourceModel(m_bankManager->transactionModel());
@@ -159,7 +161,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->Confirm_Btn->setEnabled(false);
 }
 
-// 소멸자
 MainWindow::~MainWindow()
 {
     delete ui;
@@ -167,13 +168,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupSyncMenu()
 {
-    QMenu *syncMenu = menuBar()->addMenu("Sync");
+    QMenu *syncMenu = menuBar()->addMenu("연결");
 
-    QAction *startServer = syncMenu->addAction("Start Server (LAN)");
-    QAction *stopServer = syncMenu->addAction("Stop Server");
-    QAction *connectClient = syncMenu->addAction("Connect To Server...");
-    QAction *disconnectClient = syncMenu->addAction("Disconnect");
-    QAction *syncNow = syncMenu->addAction("Sync Now");
+    QAction *startServer = syncMenu->addAction("서버 시작");
+    QAction *stopServer = syncMenu->addAction("서버 중지");
+    QAction *connectClient = syncMenu->addAction("서버 접속(클라이언트)");
+    QAction *disconnectClient = syncMenu->addAction("접속 해제(클라이언트)");
 
     connect(startServer, &QAction::triggered, this, [this]() {
         if (m_syncClient && m_syncClient->isConnected()) {
@@ -226,6 +226,8 @@ void MainWindow::setupSyncMenu()
             connect(m_syncClient, &SyncClient::connected, this, [this]() {
                 setSyncMode(SyncMode::Client);
 
+                QMessageBox::information(this, "서버 접속", "서버에 접속되었습니다.");
+
                 m_syncClient->subscribe([this](bool ok, const QJsonObject &, const QJsonObject &err) {
                     if (!ok) {
                         QMessageBox::warning(this, "구독 실패", err.value("message").toString());
@@ -252,6 +254,7 @@ void MainWindow::setupSyncMenu()
 
             connect(m_syncClient, &SyncClient::disconnected, this, [this]() {
                 if (m_syncMode == SyncMode::Client) setSyncMode(SyncMode::Offline);
+                QMessageBox::information(this, "접속 해제", "서버와의 접속이 해제되었습니다.");
             });
 
             connect(m_syncClient, &SyncClient::socketError, this, [this](const QString &message) {
@@ -282,25 +285,6 @@ void MainWindow::setupSyncMenu()
         if (!m_syncClient) return;
         m_syncClient->disconnectFromHost();
         setSyncMode(SyncMode::Offline);
-    });
-
-    connect(syncNow, &QAction::triggered, this, [this]() {
-        if (m_syncMode != SyncMode::Client || !m_syncClient || !m_syncClient->isConnected()) return;
-        m_syncClient->requestState([this](bool ok, const QJsonObject &data, const QJsonObject &err) {
-            if (!ok) {
-                QMessageBox::warning(this, "동기화 실패", err.value("message").toString());
-                return;
-            }
-            BankManager *newManager = new BankManager(this);
-            QString importErr;
-            if (!SyncState::importState(newManager, data, &importErr)) {
-                delete newManager;
-                QMessageBox::warning(this, "상태 적용 실패", importErr);
-                return;
-            }
-            replaceBankManager(newManager);
-            refreshSummary();
-        });
     });
 }
 
@@ -381,7 +365,6 @@ void MainWindow::on_Check_Acc_triggered()
         }
 
         // 계좌 존재 여부 확인
-        // [TODO] Account 파트 연동 후 실제 조회로 교체
         int accountId = -1;
         for (const auto &acc : m_bankManager->accountModel()->accounts()) {
             if (acc.accountNumber == accountNumber) {
@@ -637,7 +620,6 @@ void MainWindow::on_Withdraw_Btn_clicked()
     }
 }
 
-// [슬롯] on_Confirm_Btn_clicked()
 void MainWindow::on_Confirm_Btn_clicked()
 {
     // 1. 계좌 선택 여부 확인
@@ -758,17 +740,13 @@ void MainWindow::on_InsertAcc_triggered()
         QString password        = dlg.getPassword();
         QString passwordConfirm = dlg.getPasswordConfirm();
 
-        // ──────────────────────────────────────────────────────
         // 입력값 공백 검사
-        // ──────────────────────────────────────────────────────
         if (accountNumber.isEmpty() || password.isEmpty() || passwordConfirm.isEmpty()) {
             QMessageBox::warning(this, "입력 오류", "모든 항목을 입력해주세요.");
             return;
         }
 
-        // ──────────────────────────────────────────────────────
         // 비밀번호 일치 여부 확인
-        // ──────────────────────────────────────────────────────
         if (password != passwordConfirm) {
             QMessageBox::warning(this, "입력 오류", "비밀번호가 일치하지 않습니다.");
             return;
@@ -796,10 +774,9 @@ void MainWindow::on_InsertAcc_triggered()
             });
             return;
         } else {
-            // ──────────────────────────────────────────────────────
+
             // 계좌 생성
             // 중복 계좌번호 시 false 반환
-            // ──────────────────────────────────────────────────────
             bool ok = m_bankManager->addAccount(accountNumber, password, "", 0);
 
             if (!ok) {
@@ -826,25 +803,19 @@ void MainWindow::on_DeleteAcc_triggered()
         QString password        = dlg.getPassword();
         QString passwordConfirm = dlg.getPasswordConfirm();
 
-        // ──────────────────────────────────────────────────────
         // 입력값 공백 검사
-        // ──────────────────────────────────────────────────────
         if (accountNumber.isEmpty() || password.isEmpty() || passwordConfirm.isEmpty()) {
             QMessageBox::warning(this, "입력 오류", "모든 항목을 입력해주세요.");
             return;
         }
 
-        // ──────────────────────────────────────────────────────
         // 비밀번호 일치 여부 확인
-        // ──────────────────────────────────────────────────────
         if (password != passwordConfirm) {
             QMessageBox::warning(this, "입력 오류", "비밀번호가 일치하지 않습니다.");
             return;
         }
 
-        // ──────────────────────────────────────────────────────
         // 계좌 존재 여부 확인
-        // ──────────────────────────────────────────────────────
         int accountId = -1;
         for (const auto &acc : m_bankManager->accountModel()->accounts()) {
             if (acc.accountNumber == accountNumber) {
@@ -858,9 +829,7 @@ void MainWindow::on_DeleteAcc_triggered()
             return;
         }
 
-        // ──────────────────────────────────────────────────────
         // 비밀번호 인증 연동
-        // ──────────────────────────────────────────────────────
         const auto &accList = m_bankManager->accountModel()->accounts();
         bool isPasswordMatch = false;
         for (const auto &acc : accList) {
@@ -875,9 +844,7 @@ void MainWindow::on_DeleteAcc_triggered()
             return;
         }
 
-        // ──────────────────────────────────────────────────────
         // 삭제 확인 팝업
-        // ──────────────────────────────────────────────────────
         QMessageBox::StandardButton reply = QMessageBox::question(
             this,
             "계좌 삭제",
@@ -910,9 +877,7 @@ void MainWindow::on_DeleteAcc_triggered()
             return;
         }
 
-        // ──────────────────────────────────────────────────────
         // 계좌 삭제
-        // ──────────────────────────────────────────────────────
         bool ok = m_bankManager->removeAccount(accountId);
 
         if (!ok) {
@@ -920,9 +885,7 @@ void MainWindow::on_DeleteAcc_triggered()
             return;
         }
 
-        // ──────────────────────────────────────────────────────
         // 삭제된 계좌가 현재 선택된 계좌면 뷰어 초기화 (Clear)
-        // ──────────────────────────────────────────────────────
         if (m_selectedAccountId == accountId) {
             m_selectedAccountId = -1;
             ui->Sel_acc->setText("선택된 계좌 없음");
@@ -942,9 +905,7 @@ void MainWindow::on_DeleteAcc_triggered()
         // 해당 계좌가 남긴 거래 내역(좀비 데이터)도 전부 청소
         m_bankManager->transactionModel()->removeTransactionsByAccountId(accountId);
 
-        // ──────────────────────────────────────────────────────
         // 파일 즉시 저장 (사용자가 끄고 그냥 나갈 경우를 대비해 JSON 강제 동기화)
-        // ──────────────────────────────────────────────────────
         on_Save_Btn_clicked();
 
         if (m_syncMode == SyncMode::Server && m_syncServer && m_syncServer->isRunning()) {
@@ -1014,11 +975,73 @@ void MainWindow::refreshSummary()
 
     ui->CBal_f_lbl->setText(QString::number(balance) + " 원");
 
+
+    // 선택된 계좌의 최신 거래 찾아서 ResultGroup 라벨 업데이트
+    // 서버/클라이언트 동기화 시에도 자동 최신화되도록 추가
+    bool hasTx = false;
+    Transaction latestTx;
+
+    const auto &transactions = m_bankManager->transactionModel()->transactions();
+    for (const auto &tx : transactions) {
+        if (tx.accountId == m_selectedAccountId &&
+            tx.status == TransactionStatus::Posted) {
+            if (!hasTx || tx.occurredAt > latestTx.occurredAt) {
+                latestTx = tx;
+                hasTx = true;
+            }
+        }
+    }
+
+    if (hasTx) {
+        QString typeStr;
+        QString sign;
+        QString accLabel;
+
+        switch (latestTx.type) {
+        case TransactionType::Deposit:
+            typeStr = "입금";
+            sign = "+";
+            accLabel = accountNumberById(latestTx.accountId);
+            break;
+        case TransactionType::Withdraw:
+            typeStr = "출금";
+            sign = "-";
+            accLabel = accountNumberById(latestTx.accountId);
+            break;
+        case TransactionType::TransferOut:
+        case TransactionType::TransferIn:
+            // 보낸 계좌 → 받은 계좌 형식으로 출력
+            QString fromAccNum;
+            QString toAccNum;
+
+            for (const auto &tx : transactions) {
+                if (tx.transferGroupId == latestTx.transferGroupId &&
+                    tx.status == TransactionStatus::Posted) {
+                    if (tx.type == TransactionType::TransferOut) {
+                        fromAccNum = accountNumberById(tx.accountId);
+                    } else if (tx.type == TransactionType::TransferIn) {
+                        toAccNum = accountNumberById(tx.accountId);
+                    }
+                }
+            }
+
+            typeStr  = (latestTx.type == TransactionType::TransferOut) ? "송금(출)" : "송금(입)";
+            sign     = (latestTx.type == TransactionType::TransferOut) ? "-" : "+";
+            accLabel = fromAccNum + " ➔ " + toAccNum;
+            break;
+
+        }
+        ui->Date_r_lbl->setText(latestTx.occurredAt.toString("yyyy-MM-dd hh:mm"));
+        ui->Acc_r_lbl->setText(accLabel);
+        ui->History_r_lbl->setText(typeStr + "  " + sign + QString::number(latestTx.amount) + " 원");
+    }
+    //
+
     m_proxyModel->setAccountId(m_selectedAccountId);
     updateGraph(m_selectedAccountId);
 }
 
-// Qt Charts를 이용한 실시간 자금 운용 현황
+    // Qt Charts를 이용한 실시간 자금 운용 현황
 void MainWindow::updateGraph(int accountId) {
     // 기존 그래프 위젯(레이아웃) 무조건 초기화 (Clear)
     QLayout *oldLayout = ui->Graph_Widget->layout();

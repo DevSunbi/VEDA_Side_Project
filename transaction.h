@@ -59,7 +59,6 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
     // 모델 데이터 조작 함수
-
     void addTransaction(const Transaction &tx); // 거래 추가
     const QList<Transaction>& transactions() const;  // 전체 거래 목록 반환
     void setTransactions(const QList<Transaction> &list); // 거래 목록 교체

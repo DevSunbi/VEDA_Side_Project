@@ -11,13 +11,17 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>입금</string>
+   <string>송금</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout" columnstretch="1,4">
      <item row="0" column="1">
-      <widget class="QLineEdit" name="d_acc_le"/>
+      <widget class="QLineEdit" name="d_acc_le">
+       <property name="placeholderText">
+        <string>송금할 목표 계좌 번호</string>
+       </property>
+      </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="d_pass_lbl">
@@ -30,6 +34,9 @@
       <widget class="QLineEdit" name="d_pass_le">
        <property name="echoMode">
         <enum>QLineEdit::EchoMode::Password</enum>
+       </property>
+       <property name="placeholderText">
+        <string>선택(조회)된 계좌 비밀번호</string>
        </property>
       </widget>
      </item>
@@ -46,12 +53,16 @@
      <item row="2" column="0">
       <widget class="QLabel" name="d_amount_lbl">
        <property name="text">
-        <string>입금 금액</string>
+        <string>송금 금액</string>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QLineEdit" name="d_amount_le"/>
+      <widget class="QLineEdit" name="d_amount_le">
+       <property name="placeholderText">
+        <string>송금 금액</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

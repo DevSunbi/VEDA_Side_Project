@@ -17,6 +17,7 @@ AddAccDialog::~AddAccDialog()
     delete ui;
 }
 
+//입력된 계좌번호 반환
 QString AddAccDialog::getAccountNumber() const
 {
     return ui->addAc_le->text().trimmed();
@@ -24,14 +25,12 @@ QString AddAccDialog::getAccountNumber() const
 
 
 // 입력된 비밀번호 반환
-
 QString AddAccDialog::getPassword() const
 {
     return ui->addpass_le->text().trimmed();
 }
 
-// 입력된 비밀번호 확인 반환
-
+// 입력된 확인 비밀번호  반환
 QString AddAccDialog::getPasswordConfirm() const
 {
     return ui->addPassRe_le->text().trimmed();
