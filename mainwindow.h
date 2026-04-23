@@ -12,6 +12,9 @@
 #include "DeleteAccDialog.h"
 #include <QSortFilterProxyModel>
 
+#include "sync_client.h"
+#include "sync_server.h"
+
 class AccountFilterProxyModel : public QSortFilterProxyModel {
 public:
     AccountFilterProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent), m_accountId(-1) {}
@@ -66,6 +69,12 @@ private slots:
     void on_Confirm_Btn_clicked();      // 실제 입금/출금 처리
 
 private:
+    enum class SyncMode {
+        Offline,
+        Server,
+        Client
+    };
+
     Ui::MainWindow *ui;
     BankManager *m_bankManager;     // 모든 로직을 담당하는 매니저
     AccountFilterProxyModel *m_proxyModel; // 거래 내역 계좌별 필터링
@@ -74,10 +83,20 @@ private:
     // -1 이면 아직 선택된 계좌 없음
     int m_selectedAccountId;
 
+    SyncMode m_syncMode = SyncMode::Offline;
+    SyncServer *m_syncServer = nullptr;
+    SyncClient *m_syncClient = nullptr;
+
     // UI 보조 함수
     void refreshSummary();              // 화면 잔고 갱신
     void loadFromFile();                // JSON 복원
     void updateGraph(int accountId);    // 차트 업데이트
+
+    void setupSyncMenu();
+    void setSyncMode(SyncMode mode);
+    void replaceBankManager(BankManager *newManager);
+    QString accountNumberById(int accountId) const;
+    bool accountIdExists(int accountId) const;
 };
 
 

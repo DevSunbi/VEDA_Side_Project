@@ -15,12 +15,13 @@ AccSearchDialog::~AccSearchDialog()
     delete ui;
 }
 
+// 입력된 계좌 비밀번호 반환
 QString AccSearchDialog::getAccountNumber() const
 {
     return ui->s_acc_le->text().trimmed();
 }
 
-// [Getter] 입력된 비밀번호 반환
+// 입력된 비밀번호 반환
 QString AccSearchDialog::getPassword() const
 {
     return ui->s_pass_le->text().trimmed();

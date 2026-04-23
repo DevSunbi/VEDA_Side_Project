@@ -15,6 +15,7 @@ WithdrawDialog::~WithdrawDialog()
     delete ui;
 }
 
+// 출금 다이얼로그 입력값 반환 (현재 계좌 번호 / 비밀번호 / 출금 금액)
 QString WithdrawDialog::getAccountNumber() const
 {
     return ui->w_acc_le->text().trimmed();

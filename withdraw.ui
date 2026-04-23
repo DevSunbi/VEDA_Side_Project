@@ -17,7 +17,11 @@
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout" columnstretch="1,4">
      <item row="0" column="1">
-      <widget class="QLineEdit" name="w_acc_le"/>
+      <widget class="QLineEdit" name="w_acc_le">
+       <property name="placeholderText">
+        <string>선택(조회)된 계좌 번호</string>
+       </property>
+      </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="w_pass_lbl">
@@ -30,6 +34,9 @@
       <widget class="QLineEdit" name="w_pass_le">
        <property name="echoMode">
         <enum>QLineEdit::EchoMode::Password</enum>
+       </property>
+       <property name="placeholderText">
+        <string>선택(조회)된 계좌 비밀번호</string>
        </property>
       </widget>
      </item>
@@ -51,7 +58,11 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QLineEdit" name="w_amount_le"/>
+      <widget class="QLineEdit" name="w_amount_le">
+       <property name="placeholderText">
+        <string>출금 금액</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

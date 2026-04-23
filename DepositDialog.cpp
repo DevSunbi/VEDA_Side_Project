@@ -14,7 +14,7 @@ DepositDialog::~DepositDialog()
 {
     delete ui;
 }
-
+// 입금 다이얼로그 입력값 반환 (현재 계좌 번호 / 비밀번호 / 입금 금액)
 QString DepositDialog::getAccountNumber() const
 {
     return ui->d_acc_le->text().trimmed();

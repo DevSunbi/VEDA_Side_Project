@@ -13,6 +13,7 @@ TransferDialog::~TransferDialog()
     delete ui;
 }
 
+// 송금 다이얼로그 입력값 반환 (송금할 계좌 번호 / 비밀번호 / 송금 금액)
 QString TransferDialog::getToAccountNumber() const
 {
     return ui->d_acc_le->text();
